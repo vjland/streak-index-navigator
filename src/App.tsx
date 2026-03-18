@@ -19,6 +19,28 @@ export default function App() {
     handleNewDemoShoe();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      const key = e.key.toLowerCase();
+      if (key === 'p') {
+        setMode('live');
+        setLiveOutcomes(prev => [...prev, 'P']);
+      } else if (key === 'b') {
+        setMode('live');
+        setLiveOutcomes(prev => [...prev, 'B']);
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        setMode('live');
+        setLiveOutcomes(prev => prev.slice(0, -1));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const currentOutcomes = mode === 'demo' ? demoOutcomes : liveOutcomes;
   const streakIndex = calculateStreakIndex(currentOutcomes);
   const maData = calculateMovingAverage(streakIndex, 5);

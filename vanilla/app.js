@@ -220,6 +220,23 @@ function setupEventListeners() {
         handleClearLiveShoe();
         confirmModal.classList.add('hidden');
     });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        const key = e.key.toLowerCase();
+        if (key === 'p') {
+            if (mode !== 'live') setMode('live');
+            handleAddLiveOutcome('P');
+        } else if (key === 'b') {
+            if (mode !== 'live') setMode('live');
+            handleAddLiveOutcome('B');
+        } else if (e.key === 'Backspace') {
+            e.preventDefault();
+            if (mode !== 'live') setMode('live');
+            if (liveOutcomes.length > 0) handleUndoLiveOutcome();
+        }
+    });
 }
 
 // Actions
