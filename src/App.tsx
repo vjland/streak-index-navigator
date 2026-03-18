@@ -130,9 +130,11 @@ export default function App() {
       </header>
 
       <main className="flex-1 max-w-7xl w-full mx-auto flex flex-col">
-        <div className="bg-zinc-900 border-b border-zinc-800/80 flex-1 min-h-[500px] flex flex-col relative">
+        <div className="bg-zinc-900 border-b border-zinc-800/80 flex-1 min-h-[500px] flex flex-col relative overflow-hidden">
           {streakIndex.length > 0 ? (
-            <StreakChart data={streakIndex} maData={maData} />
+            <div className="absolute inset-0">
+              <StreakChart data={streakIndex} maData={maData} />
+            </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
               {mode === 'demo' ? 'Simulating shoe...' : 'Awaiting live input...'}
@@ -140,7 +142,7 @@ export default function App() {
           )}
         </div>
 
-        <div className="bg-zinc-900 border-b border-zinc-800/80 min-h-[80px] flex flex-col justify-end relative">
+        <div className="bg-zinc-900 border-b border-zinc-800/80 min-h-[80px] flex flex-col justify-end relative overflow-hidden">
           {currentOutcomes.length > 0 ? (
             <BigRoad outcomes={currentOutcomes} />
           ) : (
