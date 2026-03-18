@@ -344,13 +344,7 @@ function updateChart(outcomes) {
                 layout: { padding: 0 },
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        callbacks: {
-                            title: (context) => `Hand ${context[0].label}`
-                        }
-                    }
+                    tooltip: { enabled: false }
                 },
                 scales: {
                     x: {

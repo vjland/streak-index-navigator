@@ -83,7 +83,7 @@ export default function App() {
           )}
 
           {mode === 'live' && isInputOpen && (
-            <div className="absolute top-full right-0 mt-3 bg-zinc-900 border border-zinc-800 p-3 rounded-xl shadow-2xl z-20 flex flex-col gap-2 w-40 origin-top-right animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute top-full right-0 mt-3 bg-zinc-900 border border-zinc-800 p-3 rounded-xl shadow-2xl z-20 flex flex-col gap-2 w-48 origin-top-right animate-in fade-in zoom-in-95 duration-200">
               <div className="flex justify-between items-center mb-1">
                 <h3 className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Live Input</h3>
                 <button onClick={() => setIsInputOpen(false)} className="text-zinc-500 hover:text-zinc-300 transition-colors">
@@ -94,17 +94,17 @@ export default function App() {
               <div className="grid grid-cols-2 gap-2">
                 <button 
                   onClick={() => handleAddLiveOutcome('P')} 
-                  className="bg-blue-500/10 text-blue-400 border border-blue-500/20 py-2 rounded-lg font-bold hover:bg-blue-500/20 transition-colors flex flex-col items-center gap-0.5"
+                  className="bg-blue-500/10 text-blue-400 border border-blue-500/20 py-3 rounded-lg font-bold hover:bg-blue-500/20 transition-colors flex flex-col items-center gap-1"
                 >
-                  <span className="text-sm">P</span>
-                  <span className="text-[8px] uppercase tracking-wider opacity-80">Player</span>
+                  <span className="text-xl">P</span>
+                  <span className="text-xs uppercase tracking-wider opacity-80">Player</span>
                 </button>
                 <button 
                   onClick={() => handleAddLiveOutcome('B')} 
-                  className="bg-red-500/10 text-red-400 border border-red-500/20 py-2 rounded-lg font-bold hover:bg-red-500/20 transition-colors flex flex-col items-center gap-0.5"
+                  className="bg-red-500/10 text-red-400 border border-red-500/20 py-3 rounded-lg font-bold hover:bg-red-500/20 transition-colors flex flex-col items-center gap-1"
                 >
-                  <span className="text-sm">B</span>
-                  <span className="text-[8px] uppercase tracking-wider opacity-80">Banker</span>
+                  <span className="text-xl">B</span>
+                  <span className="text-xs uppercase tracking-wider opacity-80">Banker</span>
                 </button>
               </div>
               

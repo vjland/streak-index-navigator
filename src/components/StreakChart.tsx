@@ -33,10 +33,7 @@ export function StreakChart({ data, maData }: StreakChartProps) {
         data: data,
         borderColor: 'rgb(6, 182, 212)', // Cyan 500
         borderWidth: 2,
-        pointRadius: 2,
-        pointBackgroundColor: 'rgb(255, 255, 255)',
-        pointBorderColor: 'rgb(6, 182, 212)',
-        pointBorderWidth: 1,
+        pointRadius: 0,
         pointHoverRadius: 4,
         fill: false,
         tension: 0,
@@ -46,10 +43,7 @@ export function StreakChart({ data, maData }: StreakChartProps) {
         data: maData,
         borderColor: 'rgb(217, 70, 239)', // Fuchsia 500
         borderWidth: 2,
-        pointRadius: 2,
-        pointBackgroundColor: 'rgb(255, 255, 255)',
-        pointBorderColor: 'rgb(217, 70, 239)',
-        pointBorderWidth: 1,
+        pointRadius: 0,
         pointHoverRadius: 4,
         fill: false,
         tension: 0.4,
@@ -68,11 +62,7 @@ export function StreakChart({ data, maData }: StreakChartProps) {
         display: false,
       },
       tooltip: {
-        mode: 'index' as const,
-        intersect: false,
-        callbacks: {
-          title: (context: any) => `Hand ${context[0].label}`,
-        }
+        enabled: false,
       },
     },
     scales: {
