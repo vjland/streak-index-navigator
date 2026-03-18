@@ -1,0 +1,5 @@
+{
+  "name": "Streak Index Navigator",
+  "description": "A demo app that simulates an 8-deck Baccarat game and calculates the streak index.",
+  "requestFramePermissions": []
+}
