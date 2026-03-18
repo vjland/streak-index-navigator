@@ -186,6 +186,9 @@ const chartEmpty = document.getElementById('chart-empty');
 const roadEmpty = document.getElementById('road-empty');
 const bigRoadGrid = document.getElementById('big-road-grid');
 const ctx = document.getElementById('streakChart').getContext('2d');
+const confirmModal = document.getElementById('confirm-modal');
+const btnCancelClear = document.getElementById('btn-cancel-clear');
+const btnConfirmClear = document.getElementById('btn-confirm-clear');
 
 // Initialization
 function init() {
@@ -210,7 +213,18 @@ function setupEventListeners() {
     btnP.addEventListener('click', () => handleAddLiveOutcome('P'));
     btnB.addEventListener('click', () => handleAddLiveOutcome('B'));
     btnUndo.addEventListener('click', handleUndoLiveOutcome);
-    btnClear.addEventListener('click', handleClearLiveShoe);
+    btnClear.addEventListener('click', () => {
+        confirmModal.classList.remove('hidden');
+    });
+
+    btnCancelClear.addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+    });
+
+    btnConfirmClear.addEventListener('click', () => {
+        handleClearLiveShoe();
+        confirmModal.classList.add('hidden');
+    });
 
     tabBtnChart.addEventListener('click', () => setActiveTab('chart'));
     tabBtnRoad.addEventListener('click', () => setActiveTab('road'));

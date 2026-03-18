@@ -9,6 +9,7 @@ export default function App() {
   const [liveOutcomes, setLiveOutcomes] = useState<Outcome[]>([]);
   const [mode, setMode] = useState<'demo' | 'live'>('demo');
   const [isInputOpen, setIsInputOpen] = useState(false);
+  const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'chart' | 'road'>('chart');
 
   const handleNewDemoShoe = () => {
@@ -117,7 +118,7 @@ export default function App() {
                   <Undo2 size={10} /> Undo
                 </button>
                 <button 
-                  onClick={handleClearLiveShoe} 
+                  onClick={() => setIsConfirmClearOpen(true)} 
                   disabled={liveOutcomes.length === 0} 
                   className="flex-1 flex items-center justify-center gap-1 bg-rose-500/10 text-rose-400 py-1.5 rounded-md text-[10px] font-medium hover:bg-rose-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
@@ -169,6 +170,32 @@ export default function App() {
           </button>
         </div>
       </main>
+
+      {isConfirmClearOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-semibold text-zinc-100 mb-2">Clear Shoe Data?</h3>
+            <p className="text-sm text-zinc-400 mb-6">This will permanently delete all recorded hands in the current live shoe. This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsConfirmClearOpen(false)}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleClearLiveShoe();
+                  setIsConfirmClearOpen(false);
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors"
+              >
+                Clear Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
