@@ -36,7 +36,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-zinc-950 text-zinc-100 font-sans flex flex-col">
       <header className="bg-zinc-900 border-b border-zinc-800/80 px-6 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-6">
           <div className="flex items-center text-cyan-400" title="Streak Index">
@@ -129,8 +129,8 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto flex flex-col">
-        <div className="bg-zinc-900 border-b border-zinc-800/80 flex-1 min-h-[500px] flex flex-col relative overflow-hidden">
+      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto flex flex-col">
+        <div className="bg-zinc-900 border-b border-zinc-800/80 flex-1 min-h-0 flex flex-col relative overflow-hidden">
           {streakIndex.length > 0 ? (
             <div className="absolute inset-0">
               <StreakChart data={streakIndex} maData={maData} />
@@ -142,7 +142,7 @@ export default function App() {
           )}
         </div>
 
-        <div className="bg-zinc-900 border-b border-zinc-800/80 min-h-[80px] flex flex-col justify-end relative overflow-hidden">
+        <div className="bg-zinc-900 border-b border-zinc-800/80 h-[80px] flex-shrink-0 flex flex-col justify-end relative overflow-hidden">
           {currentOutcomes.length > 0 ? (
             <BigRoad outcomes={currentOutcomes} />
           ) : (

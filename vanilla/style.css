@@ -32,7 +32,8 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--zinc-950);
     color: var(--zinc-100);
-    min-height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -40,7 +41,7 @@ body {
 .app-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100%;
 }
 
 .header {
@@ -285,6 +286,7 @@ body {
 
 .main-content {
     flex: 1;
+    min-height: 0;
     max-width: 80rem;
     width: 100%;
     margin: 0 auto;
@@ -307,11 +309,12 @@ body {
 
 .chart-container {
     flex: 1;
-    min-height: 500px;
+    min-height: 0;
 }
 
 .road-container {
-    min-height: 80px;
+    height: 80px;
+    flex-shrink: 0;
     justify-content: flex-end;
 }
 
