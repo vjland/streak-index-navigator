@@ -172,7 +172,6 @@ const btnAction = document.getElementById('btn-action');
 const iconRefresh = document.getElementById('icon-refresh');
 const iconEdit = document.getElementById('icon-edit');
 const liveInputPanel = document.getElementById('live-input-panel');
-const btnClosePanel = document.getElementById('btn-close-panel');
 const btnP = document.getElementById('btn-p');
 const btnB = document.getElementById('btn-b');
 const btnUndo = document.getElementById('btn-undo');
@@ -203,8 +202,6 @@ function setupEventListeners() {
         }
     });
 
-    btnClosePanel.addEventListener('click', () => toggleInputPanel(false));
-    
     btnP.addEventListener('click', () => handleAddLiveOutcome('P'));
     btnB.addEventListener('click', () => handleAddLiveOutcome('B'));
     btnUndo.addEventListener('click', handleUndoLiveOutcome);
@@ -367,7 +364,16 @@ function updateChart(outcomes) {
                 layout: { padding: 0 },
                 plugins: {
                     legend: { display: false },
-                    tooltip: { enabled: false }
+                    tooltip: { enabled: false },
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'y'
+                        },
+                        limits: {
+                            y: { min: -40, max: 40 }
+                        }
+                    }
                 },
                 scales: {
                     x: {

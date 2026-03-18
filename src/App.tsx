@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { simulateShoe, calculateStreakIndex, calculateMovingAverage, Outcome } from './baccarat';
 import { StreakChart } from './components/StreakChart';
 import { BigRoad } from './components/BigRoad';
-import { RefreshCw, Edit3, X, Undo2, Trash2 } from 'lucide-react';
+import { RefreshCw, Edit3, Undo2, Trash2 } from 'lucide-react';
 
 export default function App() {
   const [demoOutcomes, setDemoOutcomes] = useState<Outcome[]>([]);
@@ -105,14 +105,7 @@ export default function App() {
           )}
 
           {mode === 'live' && isInputOpen && (
-            <div className="absolute top-full right-0 mt-3 bg-zinc-900 border border-zinc-800 p-3 rounded-xl shadow-2xl z-20 flex flex-col gap-2 w-48 origin-top-right animate-in fade-in zoom-in-95 duration-200">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Live Input</h3>
-                <button onClick={() => setIsInputOpen(false)} className="text-zinc-500 hover:text-zinc-300 transition-colors">
-                  <X size={12} />
-                </button>
-              </div>
-              
+            <div className="absolute top-full -right-6 mt-3 bg-zinc-900 border border-zinc-800 border-r-0 p-3 rounded-l-xl shadow-2xl z-20 flex flex-col gap-2 w-48 origin-top-right animate-in fade-in zoom-in-95 duration-200">
               <div className="grid grid-cols-2 gap-2">
                 <button 
                   onClick={() => handleAddLiveOutcome('P')} 

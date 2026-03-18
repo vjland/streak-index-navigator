@@ -9,6 +9,8 @@ import {
   Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import zoomPlugin from 'chartjs-plugin-zoom';
+import 'hammerjs';
 
 ChartJS.register(
   CategoryScale,
@@ -16,7 +18,8 @@ ChartJS.register(
   PointElement,
   LineElement,
   Tooltip,
-  Filler
+  Filler,
+  zoomPlugin
 );
 
 interface StreakChartProps {
@@ -67,6 +70,15 @@ export function StreakChart({ data, maData, mode }: StreakChartProps) {
       tooltip: {
         enabled: false,
       },
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: 'y',
+        },
+        limits: {
+          y: { min: -40, max: 40 }
+        }
+      }
     },
     scales: {
       x: {
