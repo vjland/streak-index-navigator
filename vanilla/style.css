@@ -288,7 +288,7 @@ body {
     max-width: 80rem;
     width: 100%;
     margin: 0 auto;
-    padding: 0 0 16px 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -296,11 +296,10 @@ body {
 
 .display-container {
     background-color: var(--zinc-900);
-    padding: 8px;
+    padding: 0;
     border-radius: 0;
     border: none;
     border-bottom: 1px solid rgba(39, 39, 42, 0.8);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -337,7 +336,7 @@ canvas {
 .big-road-container {
     width: 100%;
     overflow-x: auto;
-    border-radius: 8px;
+    border-radius: 0;
     position: relative;
     z-index: 2;
 }

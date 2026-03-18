@@ -71,7 +71,7 @@ export function BigRoad({ outcomes }: BigRoadProps) {
   }, [outcomes]);
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg">
+    <div className="w-full overflow-x-auto">
       <div className="inline-flex flex-col border-l border-t border-zinc-800/80 min-w-full">
         {[5, 4, 3, 2, 1, 0].map((rowIdx) => (
           <div key={rowIdx} className="flex">
