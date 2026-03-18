@@ -130,10 +130,10 @@ export default function App() {
       </header>
 
       <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto flex flex-col">
-        <div className="bg-zinc-900 border-b border-zinc-800/80 flex-1 min-h-0 flex flex-col relative overflow-hidden">
+        <div className={`border-b border-zinc-800/80 flex-1 min-h-0 flex flex-col relative overflow-hidden transition-colors duration-300 ${mode === 'live' ? 'bg-slate-900' : 'bg-zinc-900'}`}>
           {streakIndex.length > 0 ? (
             <div className="absolute inset-0">
-              <StreakChart data={streakIndex} maData={maData} />
+              <StreakChart data={streakIndex} maData={maData} mode={mode} />
             </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">

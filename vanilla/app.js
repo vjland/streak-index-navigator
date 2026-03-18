@@ -228,6 +228,13 @@ function setMode(newMode) {
     btnDemo.className = mode === 'demo' ? 'active' : '';
     btnLive.className = mode === 'live' ? 'active' : '';
     
+    const chartContainer = document.querySelector('.chart-container');
+    if (mode === 'live') {
+        chartContainer.classList.add('live-mode');
+    } else {
+        chartContainer.classList.remove('live-mode');
+    }
+    
     if (mode === 'demo') {
         iconRefresh.style.display = 'block';
         iconEdit.style.display = 'none';
@@ -306,6 +313,8 @@ function updateChart(outcomes) {
     if (chartInstance) {
         chartInstance.data.datasets[0].data = streakIndex;
         chartInstance.data.datasets[1].data = maData;
+        chartInstance.data.datasets[0].borderColor = mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)';
+        chartInstance.data.datasets[1].borderColor = mode === 'live' ? 'rgb(245, 158, 11)' : 'rgb(217, 70, 239)';
         chartInstance.update();
     } else {
         chartInstance = new Chart(ctx, {
@@ -316,7 +325,7 @@ function updateChart(outcomes) {
                     {
                         label: 'Streak Index',
                         data: streakIndex,
-                        borderColor: 'rgb(6, 182, 212)',
+                        borderColor: mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)',
                         borderWidth: 2,
                         pointRadius: 0,
                         pointHoverRadius: 4,
@@ -326,7 +335,7 @@ function updateChart(outcomes) {
                     {
                         label: '5-Period MA',
                         data: maData,
-                        borderColor: 'rgb(217, 70, 239)',
+                        borderColor: mode === 'live' ? 'rgb(245, 158, 11)' : 'rgb(217, 70, 239)',
                         borderWidth: 2,
                         pointRadius: 0,
                         pointHoverRadius: 4,
