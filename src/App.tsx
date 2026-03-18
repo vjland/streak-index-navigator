@@ -10,7 +10,6 @@ export default function App() {
   const [mode, setMode] = useState<'demo' | 'live'>('demo');
   const [isInputOpen, setIsInputOpen] = useState(false);
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'chart' | 'road'>('chart');
 
   const handleNewDemoShoe = () => {
     setDemoOutcomes(simulateShoe());
@@ -130,44 +129,25 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 flex flex-col gap-4">
-        <div className="bg-zinc-900 p-2 rounded-xl border border-zinc-800/80 shadow-sm flex-1 min-h-[500px] flex flex-col">
-          {activeTab === 'chart' ? (
-            <div className="flex-1 min-h-0 relative">
-              {streakIndex.length > 0 ? (
-                <StreakChart data={streakIndex} maData={maData} />
-              ) : (
-                <div className="h-full flex items-center justify-center text-zinc-500 text-sm">
-                  {mode === 'demo' ? 'Simulating shoe...' : 'Awaiting live input...'}
-                </div>
-              )}
-            </div>
+      <main className="flex-1 max-w-7xl w-full mx-auto px-0 pb-4 pt-0 flex flex-col gap-0">
+        <div className="bg-zinc-900 p-2 border-b border-zinc-800/80 shadow-sm flex-1 min-h-[500px] flex flex-col relative">
+          {streakIndex.length > 0 ? (
+            <StreakChart data={streakIndex} maData={maData} />
           ) : (
-            <div className="flex-1 min-h-0 relative flex flex-col justify-end">
-              {currentOutcomes.length > 0 ? (
-                <BigRoad outcomes={currentOutcomes} />
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-zinc-500 text-sm">
-                  {mode === 'demo' ? 'Simulating shoe...' : 'Awaiting live input...'}
-                </div>
-              )}
+            <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
+              {mode === 'demo' ? 'Simulating shoe...' : 'Awaiting live input...'}
             </div>
           )}
         </div>
 
-        <div className="flex justify-center gap-2">
-          <button 
-            onClick={() => setActiveTab('chart')}
-            className={`px-6 py-2 rounded-lg font-medium text-sm transition-colors ${activeTab === 'chart' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-zinc-900 text-zinc-500 hover:bg-zinc-800 border border-zinc-800/80 shadow-sm'}`}
-          >
-            Streak Index Chart
-          </button>
-          <button 
-            onClick={() => setActiveTab('road')}
-            className={`px-6 py-2 rounded-lg font-medium text-sm transition-colors ${activeTab === 'road' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-zinc-900 text-zinc-500 hover:bg-zinc-800 border border-zinc-800/80 shadow-sm'}`}
-          >
-            Big Road
-          </button>
+        <div className="bg-zinc-900 p-2 border-b border-zinc-800/80 shadow-sm min-h-[80px] flex flex-col justify-end relative">
+          {currentOutcomes.length > 0 ? (
+            <BigRoad outcomes={currentOutcomes} />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
+              {mode === 'demo' ? 'Simulating shoe...' : 'Awaiting live input...'}
+            </div>
+          )}
         </div>
       </main>
 

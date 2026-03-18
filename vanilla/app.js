@@ -163,7 +163,6 @@ let demoOutcomes = [];
 let liveOutcomes = [];
 let mode = 'demo'; // 'demo' | 'live'
 let isInputOpen = false;
-let activeTab = 'chart'; // 'chart' | 'road'
 let chartInstance = null;
 
 // DOM Elements
@@ -178,10 +177,6 @@ const btnP = document.getElementById('btn-p');
 const btnB = document.getElementById('btn-b');
 const btnUndo = document.getElementById('btn-undo');
 const btnClear = document.getElementById('btn-clear');
-const tabBtnChart = document.getElementById('tab-btn-chart');
-const tabBtnRoad = document.getElementById('tab-btn-road');
-const tabChart = document.getElementById('tab-chart');
-const tabRoad = document.getElementById('tab-road');
 const chartEmpty = document.getElementById('chart-empty');
 const roadEmpty = document.getElementById('road-empty');
 const bigRoadGrid = document.getElementById('big-road-grid');
@@ -225,9 +220,6 @@ function setupEventListeners() {
         handleClearLiveShoe();
         confirmModal.classList.add('hidden');
     });
-
-    tabBtnChart.addEventListener('click', () => setActiveTab('chart'));
-    tabBtnRoad.addEventListener('click', () => setActiveTab('road'));
 }
 
 // Actions
@@ -258,15 +250,6 @@ function toggleInputPanel(force) {
         liveInputPanel.classList.add('hidden');
         btnAction.classList.remove('active');
     }
-}
-
-function setActiveTab(tab) {
-    activeTab = tab;
-    tabBtnChart.className = tab === 'chart' ? 'active' : '';
-    tabBtnRoad.className = tab === 'road' ? 'active' : '';
-    
-    tabChart.classList.toggle('active', tab === 'chart');
-    tabRoad.classList.toggle('active', tab === 'road');
 }
 
 function handleNewDemoShoe() {

@@ -53,22 +53,15 @@
         </header>
 
         <main class="main-content">
-            <div class="display-container">
-                <div id="tab-chart" class="tab-content active">
-                    <div id="chart-empty" class="empty-state">Simulating shoe...</div>
-                    <canvas id="streakChart"></canvas>
-                </div>
-                <div id="tab-road" class="tab-content">
-                    <div id="road-empty" class="empty-state">Simulating shoe...</div>
-                    <div id="big-road-container" class="big-road-container">
-                        <div id="big-road-grid" class="big-road-grid"></div>
-                    </div>
-                </div>
+            <div class="display-container chart-container">
+                <div id="chart-empty" class="empty-state">Simulating shoe...</div>
+                <canvas id="streakChart"></canvas>
             </div>
-
-            <div class="tabs">
-                <button id="tab-btn-chart" class="active">Streak Index Chart</button>
-                <button id="tab-btn-road">Big Road</button>
+            <div class="display-container road-container">
+                <div id="road-empty" class="empty-state">Simulating shoe...</div>
+                <div id="big-road-container" class="big-road-container">
+                    <div id="big-road-grid" class="big-road-grid"></div>
+                </div>
             </div>
         </main>
     </div>

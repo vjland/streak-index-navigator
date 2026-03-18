@@ -288,35 +288,32 @@ body {
     max-width: 80rem;
     width: 100%;
     margin: 0 auto;
-    padding: 16px;
+    padding: 0 0 16px 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0;
 }
 
 .display-container {
     background-color: var(--zinc-900);
     padding: 8px;
-    border-radius: 12px;
-    border: 1px solid rgba(39, 39, 42, 0.8);
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid rgba(39, 39, 42, 0.8);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.chart-container {
     flex: 1;
     min-height: 500px;
-    display: flex;
-    flex-direction: column;
 }
 
-.tab-content {
-    flex: 1;
-    min-height: 0;
-    position: relative;
-    display: none;
-    flex-direction: column;
+.road-container {
+    min-height: 80px;
     justify-content: flex-end;
-}
-
-.tab-content.active {
-    display: flex;
 }
 
 .empty-state {
@@ -358,8 +355,8 @@ canvas {
 }
 
 .grid-cell {
-    width: 20px;
-    height: 20px;
+    width: 10px;
+    height: 10px;
     flex-shrink: 0;
     border-right: 1px solid rgba(39, 39, 42, 0.8);
     border-bottom: 1px solid rgba(39, 39, 42, 0.8);
@@ -371,10 +368,10 @@ canvas {
 }
 
 .cell-marker {
-    width: 16px;
-    height: 16px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    border: 1.5px solid;
+    border: 1px solid;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -391,23 +388,23 @@ canvas {
 
 .tie-line {
     position: absolute;
-    width: 16px;
-    height: 1.5px;
+    width: 8px;
+    height: 1px;
     background-color: var(--emerald-500);
     transform: rotate(-45deg);
 }
 
 .tie-count {
     position: absolute;
-    bottom: -4px;
-    right: -4px;
-    font-size: 7px;
+    bottom: -2px;
+    right: -2px;
+    font-size: 5px;
     font-weight: 700;
     color: var(--emerald-400);
     background-color: var(--zinc-800);
     border-radius: 50%;
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -416,34 +413,7 @@ canvas {
     line-height: 1;
 }
 
-.tabs {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-}
 
-.tabs button {
-    padding: 8px 24px;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    background-color: var(--zinc-900);
-    color: var(--zinc-500);
-    border: 1px solid rgba(39, 39, 42, 0.8);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.tabs button:hover {
-    background-color: var(--zinc-800);
-}
-
-.tabs button.active {
-    background-color: rgba(6, 182, 212, 0.1);
-    color: var(--cyan-400);
-    border-color: rgba(6, 182, 212, 0.2);
-}
 
 .modal-overlay {
     position: fixed;

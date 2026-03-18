@@ -80,17 +80,17 @@ export function BigRoad({ outcomes }: BigRoadProps) {
               return (
                 <div 
                   key={`${colIdx}-${rowIdx}`} 
-                  className="w-5 h-5 flex-shrink-0 border-r border-b border-zinc-800/80 flex items-center justify-center relative bg-zinc-900/50"
+                  className="w-3 h-3 flex-shrink-0 border-r border-b border-zinc-800/80 flex items-center justify-center relative bg-zinc-900/50"
                 >
                   {cell && (
-                    <div className={`w-4 h-4 rounded-full border-[1.5px] flex items-center justify-center relative
+                    <div className={`w-2.5 h-2.5 rounded-full border flex items-center justify-center relative
                       ${cell.outcome === 'P' ? 'border-blue-500' : 'border-red-500'}
                     `}>
                       {cell.ties > 0 && (
-                        <div className="absolute w-4 h-[1.5px] bg-emerald-500 transform -rotate-45" />
+                        <div className="absolute w-2.5 h-[1px] bg-emerald-500 transform -rotate-45" />
                       )}
                       {cell.ties > 1 && (
-                        <span className="absolute -bottom-1 -right-1 text-[7px] font-bold text-emerald-400 bg-zinc-800 rounded-full w-3 h-3 flex items-center justify-center shadow-sm border border-emerald-900 leading-none">
+                        <span className="absolute -bottom-[2px] -right-[2px] text-[6px] font-bold text-emerald-400 bg-zinc-800 rounded-full w-2.5 h-2.5 flex items-center justify-center shadow-sm border border-emerald-900 leading-none">
                           {cell.ties}
                         </span>
                       )}
