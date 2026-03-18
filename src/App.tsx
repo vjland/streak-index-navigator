@@ -142,7 +142,7 @@ export default function App() {
           )}
         </div>
 
-        <div className="bg-zinc-900 border-b border-zinc-800/80 h-[80px] flex-shrink-0 flex flex-col justify-end relative overflow-hidden">
+        <div className="bg-zinc-900 border-b border-zinc-800/80 h-[128px] flex-shrink-0 flex flex-col justify-end relative overflow-hidden">
           {currentOutcomes.length > 0 ? (
             <BigRoad outcomes={currentOutcomes} />
           ) : (

@@ -318,7 +318,7 @@ body {
 }
 
 .road-container {
-    height: 80px;
+    height: 128px;
     flex-shrink: 0;
     justify-content: flex-end;
 }
@@ -362,8 +362,8 @@ canvas {
 }
 
 .grid-cell {
-    width: 10px;
-    height: 10px;
+    width: 15px;
+    height: 15px;
     flex-shrink: 0;
     border-right: 1px solid rgba(39, 39, 42, 0.8);
     border-bottom: 1px solid rgba(39, 39, 42, 0.8);
@@ -375,10 +375,10 @@ canvas {
 }
 
 .cell-marker {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    border: 1px solid;
+    border: 1.5px solid;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -395,23 +395,23 @@ canvas {
 
 .tie-line {
     position: absolute;
-    width: 8px;
-    height: 1px;
+    width: 12px;
+    height: 1.5px;
     background-color: var(--emerald-500);
     transform: rotate(-45deg);
 }
 
 .tie-count {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
-    font-size: 5px;
+    bottom: -3px;
+    right: -3px;
+    font-size: 7.5px;
     font-weight: 700;
     color: var(--emerald-400);
     background-color: var(--zinc-800);
     border-radius: 50%;
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
