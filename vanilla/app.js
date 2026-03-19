@@ -100,64 +100,6 @@ function calculateMovingAverage(data, period = 5) {
     return ma;
 }
 
-function generateBigRoadGrid(outcomes) {
-    const matrix = [];
-    const ensureCol = (c) => {
-        while (matrix.length <= c) matrix.push(Array(6).fill(null));
-    };
-
-    let logicalRow = 0;
-    let streakStartCol = 0;
-    let lastOutcome = null;
-    let lastCell = null;
-    let leadTies = 0;
-
-    for (const outcome of outcomes) {
-        if (outcome === 'T') {
-            if (lastCell) lastCell.ties++;
-            else leadTies++;
-            continue;
-        }
-
-        if (lastOutcome === null) {
-            lastOutcome = outcome;
-            logicalRow = 0;
-            streakStartCol = 0;
-        } else if (outcome === lastOutcome) {
-            logicalRow++;
-        } else {
-            lastOutcome = outcome;
-            logicalRow = 0;
-            streakStartCol++;
-            while (matrix[streakStartCol] && matrix[streakStartCol][0] !== null) {
-                streakStartCol++;
-            }
-        }
-
-        let placeCol = streakStartCol;
-        let placeRow = logicalRow;
-
-        if (placeRow >= 6) {
-            placeCol += (placeRow - 5);
-            placeRow = 5;
-        }
-        
-        ensureCol(placeCol);
-        while (matrix[placeCol][placeRow] !== null) {
-            placeCol++;
-            ensureCol(placeCol);
-        }
-
-        const cell = { outcome, ties: leadTies };
-        leadTies = 0;
-        matrix[placeCol][placeRow] = cell;
-        lastCell = cell;
-    }
-
-    ensureCol(Math.max(25, matrix.length));
-    return matrix;
-}
-
 // App State
 let demoOutcomes = [];
 let liveOutcomes = [];
@@ -177,8 +119,7 @@ const btnB = document.getElementById('btn-b');
 const btnUndo = document.getElementById('btn-undo');
 const btnClear = document.getElementById('btn-clear');
 const chartEmpty = document.getElementById('chart-empty');
-const roadEmpty = document.getElementById('road-empty');
-const bigRoadGrid = document.getElementById('big-road-grid');
+const lastOutcomeEl = document.getElementById('last-outcome');
 const ctx = document.getElementById('streakChart').getContext('2d');
 const confirmModal = document.getElementById('confirm-modal');
 const btnCancelClear = document.getElementById('btn-cancel-clear');
@@ -301,12 +242,9 @@ function updateUI() {
     // Update empty states
     const emptyText = mode === 'demo' ? 'Simulating shoe...' : 'Awaiting live input...';
     chartEmpty.textContent = emptyText;
-    roadEmpty.textContent = emptyText;
     
     chartEmpty.style.display = hasData ? 'none' : 'flex';
-    roadEmpty.style.display = hasData ? 'none' : 'flex';
     document.getElementById('streakChart').style.display = hasData ? 'block' : 'none';
-    document.getElementById('big-road-container').style.display = hasData ? 'block' : 'none';
 
     // Update buttons
     btnUndo.disabled = liveOutcomes.length === 0;
@@ -314,7 +252,21 @@ function updateUI() {
 
     if (hasData) {
         updateChart(currentOutcomes);
-        updateBigRoad(currentOutcomes);
+        
+        // Update last outcome
+        const last = currentOutcomes[currentOutcomes.length - 1];
+        lastOutcomeEl.textContent = last;
+        lastOutcomeEl.className = 'last-outcome'; // reset classes
+        if (last === 'P') {
+            lastOutcomeEl.classList.add('outcome-p');
+        } else if (last === 'B') {
+            lastOutcomeEl.classList.add('outcome-b');
+        } else {
+            lastOutcomeEl.classList.add('outcome-t');
+        }
+        lastOutcomeEl.classList.remove('hidden');
+    } else {
+        lastOutcomeEl.classList.add('hidden');
     }
 }
 
@@ -399,48 +351,6 @@ function updateChart(outcomes) {
             }
         });
     }
-}
-
-function updateBigRoad(outcomes) {
-    const grid = generateBigRoadGrid(outcomes);
-    bigRoadGrid.innerHTML = '';
-
-    const rows = [5, 4, 3, 2, 1, 0];
-    
-    rows.forEach(rowIdx => {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'grid-row';
-        
-        grid.forEach((col, colIdx) => {
-            const cell = col[rowIdx];
-            const cellDiv = document.createElement('div');
-            cellDiv.className = 'grid-cell';
-            
-            if (cell) {
-                const marker = document.createElement('div');
-                marker.className = `cell-marker ${cell.outcome === 'P' ? 'marker-p' : 'marker-b'}`;
-                
-                if (cell.ties > 0) {
-                    const tieLine = document.createElement('div');
-                    tieLine.className = 'tie-line';
-                    marker.appendChild(tieLine);
-                }
-                
-                if (cell.ties > 1) {
-                    const tieCount = document.createElement('span');
-                    tieCount.className = 'tie-count';
-                    tieCount.textContent = cell.ties;
-                    marker.appendChild(tieCount);
-                }
-                
-                cellDiv.appendChild(marker);
-            }
-            
-            rowDiv.appendChild(cellDiv);
-        });
-        
-        bigRoadGrid.appendChild(rowDiv);
-    });
 }
 
 // Start

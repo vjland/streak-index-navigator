@@ -318,10 +318,37 @@ body {
     background-color: var(--slate-900, #0f172a);
 }
 
-.road-container {
-    height: 128px;
-    flex-shrink: 0;
-    justify-content: flex-end;
+.last-outcome {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.last-outcome.hidden {
+    display: none;
+}
+
+.outcome-p {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: var(--blue-400);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.outcome-b {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: var(--red-400);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.outcome-t {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: var(--emerald-400);
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .empty-state {
@@ -341,87 +368,6 @@ canvas {
     width: 100% !important;
     height: 100% !important;
 }
-
-.big-road-container {
-    width: 100%;
-    overflow-x: auto;
-    border-radius: 0;
-    position: relative;
-    z-index: 2;
-}
-
-.big-road-grid {
-    display: inline-flex;
-    flex-direction: column;
-    border-left: 1px solid rgba(39, 39, 42, 0.8);
-    border-top: 1px solid rgba(39, 39, 42, 0.8);
-    min-width: 100%;
-}
-
-.grid-row {
-    display: flex;
-}
-
-.grid-cell {
-    width: 15px;
-    height: 15px;
-    flex-shrink: 0;
-    border-right: 1px solid rgba(39, 39, 42, 0.8);
-    border-bottom: 1px solid rgba(39, 39, 42, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background-color: rgba(24, 24, 27, 0.5);
-}
-
-.cell-marker {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1.5px solid;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.marker-p {
-    border-color: var(--blue-500);
-}
-
-.marker-b {
-    border-color: var(--red-500);
-}
-
-.tie-line {
-    position: absolute;
-    width: 12px;
-    height: 1.5px;
-    background-color: var(--emerald-500);
-    transform: rotate(-45deg);
-}
-
-.tie-count {
-    position: absolute;
-    bottom: -3px;
-    right: -3px;
-    font-size: 7.5px;
-    font-weight: 700;
-    color: var(--emerald-400);
-    background-color: var(--zinc-800);
-    border-radius: 50%;
-    width: 12px;
-    height: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--emerald-900);
-    line-height: 1;
-}
-
-
 
 .modal-overlay {
     position: fixed;

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { simulateShoe, calculateStreakIndex, calculateMovingAverage, Outcome } from './baccarat';
 import { StreakChart } from './components/StreakChart';
-import { BigRoad } from './components/BigRoad';
 import { RefreshCw, Edit3, Undo2, Trash2 } from 'lucide-react';
 
 export default function App() {
@@ -83,6 +82,18 @@ export default function App() {
               Live
             </button>
           </div>
+          
+          {currentOutcomes.length > 0 && (
+            <div className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold ${
+              currentOutcomes[currentOutcomes.length - 1] === 'P' 
+                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
+                : currentOutcomes[currentOutcomes.length - 1] === 'B'
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                  : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+            }`}>
+              {currentOutcomes[currentOutcomes.length - 1]}
+            </div>
+          )}
         </div>
 
         <div className="relative">
@@ -145,21 +156,11 @@ export default function App() {
       </header>
 
       <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto flex flex-col">
-        <div className={`border-b border-zinc-800/80 flex-1 min-h-0 flex flex-col relative overflow-hidden transition-colors duration-300 ${mode === 'live' ? 'bg-slate-900' : 'bg-zinc-900'}`}>
+        <div className={`flex-1 min-h-0 flex flex-col relative overflow-hidden transition-colors duration-300 ${mode === 'live' ? 'bg-slate-900' : 'bg-zinc-900'}`}>
           {streakIndex.length > 0 ? (
             <div className="absolute inset-0">
               <StreakChart data={streakIndex} maData={maData} mode={mode} />
             </div>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
-              {mode === 'demo' ? 'Simulating shoe...' : 'Awaiting live input...'}
-            </div>
-          )}
-        </div>
-
-        <div className="bg-zinc-900 border-b border-zinc-800/80 h-[128px] flex-shrink-0 flex flex-col justify-end relative overflow-hidden">
-          {currentOutcomes.length > 0 ? (
-            <BigRoad outcomes={currentOutcomes} />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
               {mode === 'demo' ? 'Simulating shoe...' : 'Awaiting live input...'}
