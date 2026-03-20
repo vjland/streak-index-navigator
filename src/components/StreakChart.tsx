@@ -73,7 +73,7 @@ export function StreakChart({ data, maData, mode }: StreakChartProps) {
       zoom: {
         pan: {
           enabled: true,
-          mode: 'y',
+          mode: 'y' as const,
         },
         limits: {
           y: { min: -40, max: 40 }

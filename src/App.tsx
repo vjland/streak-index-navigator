@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { simulateShoe, calculateStreakIndex, calculateMovingAverage, Outcome } from './baccarat';
 import { StreakChart } from './components/StreakChart';
-import { RefreshCw, Edit3, Undo2, Trash2 } from 'lucide-react';
+import { RefreshCw, Edit3, Undo2, Trash2, List } from 'lucide-react';
+
+interface Session {
+  id: string;
+  date: string;
+  duration: string;
+  net: number;
+  steps: number;
+  model?: string;
+}
 
 export default function App() {
   const [demoOutcomes, setDemoOutcomes] = useState<Outcome[]>([]);
@@ -9,6 +18,102 @@ export default function App() {
   const [mode, setMode] = useState<'demo' | 'live'>('demo');
   const [isInputOpen, setIsInputOpen] = useState(false);
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
+  const [isConfirmClearSessionsOpen, setIsConfirmClearSessionsOpen] = useState(false);
+
+  // Calculator state
+  const [netUnits, setNetUnits] = useState(0);
+  const [steps, setSteps] = useState(0);
+  const [unitHistory, setUnitHistory] = useState<number[]>([]);
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  const [sessions, setSessions] = useState<Session[]>(() => {
+    const saved = localStorage.getItem('baccarat_sessions');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+  const [isLogOpen, setIsLogOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('baccarat_sessions', JSON.stringify(sessions));
+  }, [sessions]);
+
+  const handleUnitChange = (delta: number) => {
+    if (sessionStartTime === null) {
+      setSessionStartTime(Date.now());
+    }
+    setNetUnits(prev => prev + delta);
+    setSteps(prev => prev + 1);
+    setUnitHistory(prev => [...prev, delta]);
+  };
+
+  const handleUndoUnitChange = () => {
+    if (unitHistory.length > 0) {
+      const lastDelta = unitHistory[unitHistory.length - 1];
+      setNetUnits(prev => prev - lastDelta);
+      setSteps(prev => prev - 1);
+      setUnitHistory(prev => prev.slice(0, -1));
+      if (unitHistory.length === 1) {
+        setSessionStartTime(null);
+      }
+    }
+  };
+
+  const handleRefreshCalculator = () => {
+    if (sessionStartTime !== null && steps > 0) {
+      const endTime = Date.now();
+      const durationMs = endTime - sessionStartTime;
+      const minutes = Math.floor(durationMs / 60000);
+      const seconds = Math.floor((durationMs % 60000) / 1000);
+      const durationStr = `${minutes}m ${seconds}s`;
+      
+      const newSession = {
+        id: Math.random().toString(36).substring(2, 9),
+        date: new Date().toLocaleString(),
+        duration: durationStr,
+        net: netUnits,
+        steps: steps,
+        model: 'Sigma'
+      };
+      
+      setSessions(prev => [newSession, ...prev]);
+    }
+    
+    setNetUnits(0);
+    setSteps(0);
+    setUnitHistory([]);
+    setSessionStartTime(null);
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['Date', 'Time', 'Duration', 'Steps', 'Net', 'Model'];
+    const rows = sessions.map(session => {
+      const datePart = session.date.includes(',') ? session.date.split(',')[0].trim() : session.date;
+      const timePart = session.date.includes(',') ? session.date.split(',')[1]?.trim() : '';
+      return [
+        datePart,
+        timePart,
+        session.duration,
+        session.steps || 0,
+        session.net,
+        session.model || 'Sigma'
+      ].join(',');
+    });
+    
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'baccarat_sessions.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleNewDemoShoe = () => {
     setDemoOutcomes(simulateShoe());
@@ -167,6 +272,101 @@ export default function App() {
             </div>
           )}
         </div>
+        
+        {mode === 'live' && (
+          <div className="bg-zinc-900 border-t border-zinc-800/80 p-4 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`text-2xl font-bold ${netUnits > 0 ? 'text-emerald-400' : netUnits < 0 ? 'text-rose-400' : 'text-zinc-100'}`}>
+                  {netUnits > 0 ? '+' : ''}{netUnits}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => handleUnitChange(-1)} className="w-10 h-10 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center font-bold text-lg hover:bg-rose-500/20 transition-colors">-1</button>
+                <button onClick={() => handleUnitChange(1)} className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-lg hover:bg-emerald-500/20 transition-colors">+1</button>
+                <button onClick={handleUndoUnitChange} disabled={unitHistory.length === 0} className="w-10 h-10 rounded-lg bg-zinc-800 text-zinc-300 border border-zinc-700/50 flex items-center justify-center font-bold text-lg hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">C</button>
+                <div className="w-px h-8 bg-zinc-800 mx-2"></div>
+                <button onClick={handleRefreshCalculator} className="p-2 rounded-md bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors" title="Refresh Session">
+                  <RefreshCw size={18} />
+                </button>
+                <button onClick={() => setIsLogOpen(!isLogOpen)} className={`p-2 rounded-md transition-colors ${isLogOpen ? 'bg-cyan-500/20 text-cyan-400' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`} title="Session Log">
+                  <List size={18} />
+                </button>
+              </div>
+            </div>
+            
+            {isLogOpen && (
+              <div className="mt-4 pt-4 border-t border-zinc-800/80">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-zinc-300">Session History</h3>
+                  {sessions.length > 0 && (
+                    <div className="flex items-center gap-4">
+                      <button 
+                        onClick={handleExportCSV}
+                        className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                      >
+                        Export CSV
+                      </button>
+                      <button 
+                        onClick={() => setIsConfirmClearSessionsOpen(true)}
+                        className="text-xs text-rose-400 hover:text-rose-300 transition-colors"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {sessions.length === 0 ? (
+                  <div className="text-sm text-zinc-500 italic">No sessions recorded yet.</div>
+                ) : (
+                  <div className="space-y-6 max-h-60 overflow-y-auto pr-2">
+                    {Object.entries(
+                      sessions.reduce((acc, session) => {
+                        const datePart = session.date.split(',')[0];
+                        if (!acc[datePart]) acc[datePart] = [];
+                        acc[datePart].push(session);
+                        return acc;
+                      }, {} as Record<string, Session[]>)
+                    ).map(([date, dateSessions]) => (
+                      <div key={date} className="space-y-2">
+                        <h4 className="text-xs font-medium text-zinc-500 uppercase tracking-wider sticky top-0 bg-zinc-900 py-1">{date}</h4>
+                        <div className="bg-zinc-950/50 rounded-lg border border-zinc-800/50 overflow-hidden">
+                          <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-zinc-500 bg-zinc-900/50 border-b border-zinc-800/50">
+                              <tr>
+                                <th className="px-3 py-2 font-medium">Time</th>
+                                <th className="px-3 py-2 font-medium">Duration</th>
+                                <th className="px-3 py-2 font-medium text-right">Steps</th>
+                                <th className="px-3 py-2 font-medium text-right">Net</th>
+                                <th className="hidden">Model</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-zinc-800/50">
+                              {(dateSessions as Session[]).map(session => {
+                                const timePart = session.date.split(',')[1]?.trim() || session.date;
+                                return (
+                                  <tr key={session.id} className="hover:bg-zinc-900/30 transition-colors">
+                                    <td className="px-3 py-2 text-zinc-400">{timePart}</td>
+                                    <td className="px-3 py-2 text-zinc-300">{session.duration}</td>
+                                    <td className="px-3 py-2 text-zinc-300 text-right">{session.steps || 0}</td>
+                                    <td className={`px-3 py-2 font-bold text-right ${session.net > 0 ? 'text-emerald-400' : session.net < 0 ? 'text-rose-400' : 'text-zinc-400'}`}>
+                                      {session.net > 0 ? '+' : ''}{session.net}
+                                    </td>
+                                    <td className="hidden">{session.model || 'Sigma'}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {isConfirmClearOpen && (
@@ -189,6 +389,32 @@ export default function App() {
                 className="px-4 py-2 rounded-lg text-sm font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors"
               >
                 Clear Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isConfirmClearSessionsOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80">
+          <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-semibold text-zinc-100 mb-2">Clear Session History?</h3>
+            <p className="text-sm text-zinc-400 mb-6">This will permanently delete all recorded sessions. This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsConfirmClearSessionsOpen(false)}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setSessions([]);
+                  setIsConfirmClearSessionsOpen(false);
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors"
+              >
+                Clear History
               </button>
             </div>
           </div>
