@@ -107,22 +107,6 @@ let mode = 'demo'; // 'demo' | 'live'
 let isInputOpen = false;
 let chartInstance = null;
 
-// Calculator State
-let netUnits = 0;
-let steps = 0;
-let unitHistory = [];
-let sessionStartTime = null;
-let sessions = [];
-try {
-    const saved = localStorage.getItem('baccarat_sessions_vanilla');
-    if (saved) {
-        sessions = JSON.parse(saved);
-    }
-} catch (e) {
-    sessions = [];
-}
-let isLogOpen = false;
-
 // DOM Elements
 const btnDemo = document.getElementById('btn-demo');
 const btnLive = document.getElementById('btn-live');
@@ -143,26 +127,11 @@ const btnConfirmClear = document.getElementById('btn-confirm-clear');
 
 // Calculator DOM
 const calculatorFooter = document.getElementById('calculator-footer');
-const calcNetValue = document.getElementById('calc-net-value');
-const btnCalcMinus = document.getElementById('btn-calc-minus');
-const btnCalcPlus = document.getElementById('btn-calc-plus');
-const btnCalcUndo = document.getElementById('btn-calc-undo');
-const btnCalcRefresh = document.getElementById('btn-calc-refresh');
-const btnCalcLog = document.getElementById('btn-calc-log');
-const calcLogPanel = document.getElementById('calc-log-panel');
-const calcLogEmpty = document.getElementById('calc-log-empty');
-const calcLogList = document.getElementById('calc-log-list');
-const btnCalcClearAll = document.getElementById('btn-calc-clear-all');
-const btnCalcExportCsv = document.getElementById('btn-calc-export-csv');
-const confirmSessionsModal = document.getElementById('confirm-sessions-modal');
-const btnCancelClearSessions = document.getElementById('btn-cancel-clear-sessions');
-const btnConfirmClearSessions = document.getElementById('btn-confirm-clear-sessions');
 
 // Initialization
 function init() {
     handleNewDemoShoe();
     setupEventListeners();
-    updateCalculatorUI();
 }
 
 function setupEventListeners() {
@@ -191,29 +160,6 @@ function setupEventListeners() {
     btnConfirmClear.addEventListener('click', () => {
         handleClearLiveShoe();
         confirmModal.classList.add('hidden');
-    });
-
-    // Calculator listeners
-    btnCalcMinus.addEventListener('click', () => handleUnitChange(-1));
-    btnCalcPlus.addEventListener('click', () => handleUnitChange(1));
-    btnCalcUndo.addEventListener('click', handleUndoUnitChange);
-    btnCalcRefresh.addEventListener('click', handleRefreshCalculator);
-    btnCalcLog.addEventListener('click', toggleCalcLog);
-    btnCalcExportCsv.addEventListener('click', handleExportCSV);
-
-    btnCalcClearAll.addEventListener('click', () => {
-        confirmSessionsModal.classList.remove('hidden');
-    });
-
-    btnCancelClearSessions.addEventListener('click', () => {
-        confirmSessionsModal.classList.add('hidden');
-    });
-
-    btnConfirmClearSessions.addEventListener('click', () => {
-        sessions = [];
-        localStorage.setItem('baccarat_sessions_vanilla', JSON.stringify(sessions));
-        updateCalculatorUI();
-        confirmSessionsModal.classList.add('hidden');
     });
 
     document.addEventListener('keydown', (e) => {
@@ -291,182 +237,6 @@ function handleUndoLiveOutcome() {
 function handleClearLiveShoe() {
     liveOutcomes = [];
     updateUI();
-}
-
-// Calculator Actions
-function handleUnitChange(delta) {
-    if (sessionStartTime === null) {
-        sessionStartTime = Date.now();
-    }
-    netUnits += delta;
-    steps += 1;
-    unitHistory.push(delta);
-    updateCalculatorUI();
-}
-
-function handleUndoUnitChange() {
-    if (unitHistory.length > 0) {
-        const lastDelta = unitHistory.pop();
-        netUnits -= lastDelta;
-        steps -= 1;
-        if (unitHistory.length === 0) {
-            sessionStartTime = null;
-        }
-        updateCalculatorUI();
-    }
-}
-
-function handleRefreshCalculator() {
-    if (sessionStartTime !== null && steps > 0) {
-        const endTime = Date.now();
-        const durationMs = endTime - sessionStartTime;
-        const minutes = Math.floor(durationMs / 60000);
-        const seconds = Math.floor((durationMs % 60000) / 1000);
-        const durationStr = `${minutes}m ${seconds}s`;
-        
-        const newSession = {
-            id: Math.random().toString(36).substring(2, 9),
-            date: new Date().toLocaleString(),
-            duration: durationStr,
-            net: netUnits,
-            steps: steps,
-            model: 'Sigma'
-        };
-        
-        sessions.unshift(newSession);
-        localStorage.setItem('baccarat_sessions_vanilla', JSON.stringify(sessions));
-    }
-    
-    netUnits = 0;
-    steps = 0;
-    unitHistory = [];
-    sessionStartTime = null;
-    updateCalculatorUI();
-}
-
-function handleExportCSV() {
-    const headers = ['Date', 'Time', 'Duration', 'Steps', 'Net', 'Model'];
-    const rows = sessions.map(session => {
-        const datePart = session.date.includes(',') ? session.date.split(',')[0].trim() : session.date;
-        const timePart = session.date.includes(',') ? session.date.split(',')[1]?.trim() : '';
-        return [
-            datePart,
-            timePart,
-            session.duration,
-            session.steps || 0,
-            session.net,
-            session.model || 'Sigma'
-        ].join(',');
-    });
-    
-    const csvContent = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'baccarat_sessions.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-function toggleCalcLog() {
-    isLogOpen = !isLogOpen;
-    updateCalculatorUI();
-}
-
-function updateCalculatorUI() {
-    // Value
-    calcNetValue.textContent = (netUnits > 0 ? '+' : '') + netUnits;
-    calcNetValue.className = 'calc-value';
-    if (netUnits > 0) calcNetValue.classList.add('positive');
-    else if (netUnits < 0) calcNetValue.classList.add('negative');
-
-    // Panel
-    if (isLogOpen) {
-        calcLogPanel.classList.remove('hidden');
-        btnCalcLog.classList.add('active');
-    } else {
-        calcLogPanel.classList.add('hidden');
-        btnCalcLog.classList.remove('active');
-    }
-    
-    btnCalcUndo.disabled = unitHistory.length === 0;
-
-    // List
-    if (sessions.length === 0) {
-        calcLogEmpty.style.display = 'block';
-        calcLogList.style.display = 'none';
-        btnCalcClearAll.classList.add('hidden');
-        btnCalcExportCsv.classList.add('hidden');
-    } else {
-        calcLogEmpty.style.display = 'none';
-        calcLogList.style.display = 'block';
-        btnCalcClearAll.classList.remove('hidden');
-        btnCalcExportCsv.classList.remove('hidden');
-        
-        calcLogList.innerHTML = '';
-        
-        // Group by date
-        const groupedSessions = sessions.reduce((acc, session) => {
-            const datePart = session.date.split(',')[0];
-            if (!acc[datePart]) acc[datePart] = [];
-            acc[datePart].push(session);
-            return acc;
-        }, {});
-
-        Object.entries(groupedSessions).forEach(([date, dateSessions]) => {
-            const groupDiv = document.createElement('div');
-            groupDiv.className = 'calc-log-group';
-            
-            const header = document.createElement('h4');
-            header.className = 'calc-log-group-header';
-            header.textContent = date;
-            groupDiv.appendChild(header);
-            
-            const tableContainer = document.createElement('div');
-            tableContainer.className = 'calc-log-table-container';
-            
-            const table = document.createElement('table');
-            table.className = 'calc-log-table';
-            
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th>Time</th>
-                    <th>Duration</th>
-                    <th class="text-right">Steps</th>
-                    <th class="text-right">Net</th>
-                    <th class="hidden">Model</th>
-                </tr>
-            `;
-            table.appendChild(thead);
-            
-            const tbody = document.createElement('tbody');
-            dateSessions.forEach(session => {
-                const tr = document.createElement('tr');
-                const timePart = session.date.split(',')[1] ? session.date.split(',')[1].trim() : session.date;
-                const netClass = session.net > 0 ? 'text-emerald' : session.net < 0 ? 'text-rose' : 'text-zinc';
-                const netText = (session.net > 0 ? '+' : '') + session.net;
-                const stepsText = session.steps || 0;
-                const modelText = session.model || 'Sigma';
-                
-                tr.innerHTML = `
-                    <td class="text-zinc-400">${timePart}</td>
-                    <td class="text-zinc-300">${session.duration}</td>
-                    <td class="text-zinc-300 text-right">${stepsText}</td>
-                    <td class="font-bold text-right ${netClass}">${netText}</td>
-                    <td class="hidden">${modelText}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-            
-            table.appendChild(tbody);
-            tableContainer.appendChild(table);
-            groupDiv.appendChild(tableContainer);
-            calcLogList.appendChild(groupDiv);
-        });
-    }
 }
 
 // UI Updates
