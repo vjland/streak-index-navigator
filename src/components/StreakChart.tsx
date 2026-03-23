@@ -41,7 +41,7 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         pointRadius: 0,
         pointHoverRadius: 4,
         fill: false,
-        tension: 0.4,
+        tension: 0.1,
       }
     ],
   };

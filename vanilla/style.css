@@ -70,10 +70,18 @@ body {
 }
 
 .logo-text {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     color: var(--zinc-100);
+    line-height: 1.75rem;
+    display: inline;
+}
+
+@media (max-width: 639px) {
+    .logo-text {
+        display: none;
+    }
 }
 
 .logo {

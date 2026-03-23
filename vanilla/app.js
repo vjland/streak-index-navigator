@@ -257,6 +257,7 @@ function updateUI() {
             lastOutcomeEl.classList.remove('hidden');
         } else {
             lastOutcomeEl.classList.add('hidden');
+            lastOutcomeEl.textContent = '';
         }
     } else {
         lastOutcomeEl.classList.add('hidden');
@@ -286,7 +287,7 @@ function updateChart(outcomes) {
                         pointRadius: 0,
                         pointHoverRadius: 4,
                         fill: false,
-                        tension: 0.4,
+                        tension: 0.1,
                     }
                 ]
             },
