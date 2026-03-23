@@ -93,19 +93,3 @@ export function calculateStreakIndex(outcomes: Outcome[]): number[] {
   
   return index;
 }
-
-export function calculateMovingAverage(data: number[], period: number = 5): (number | null)[] {
-  const ma: (number | null)[] = [];
-  for (let i = 0; i < data.length; i++) {
-    if (i < period - 1) {
-      ma.push(null);
-    } else {
-      let sum = 0;
-      for (let j = 0; j < period; j++) {
-        sum += data[i - j];
-      }
-      ma.push(sum / period);
-    }
-  }
-  return ma;
-}

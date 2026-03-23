@@ -24,11 +24,10 @@ ChartJS.register(
 
 interface StreakChartProps {
   data: number[];
-  maData: (number | null)[];
   mode: 'demo' | 'live';
 }
 
-export function StreakChart({ data, maData, mode }: StreakChartProps) {
+export function StreakChart({ data, mode }: StreakChartProps) {
   const isLive = mode === 'live';
   
   const chartData = {
@@ -38,16 +37,6 @@ export function StreakChart({ data, maData, mode }: StreakChartProps) {
         label: 'Streak Index',
         data: data,
         borderColor: isLive ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)', // Emerald 500 : Cyan 500
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 4,
-        fill: false,
-        tension: 0,
-      },
-      {
-        label: '5-Period MA',
-        data: maData,
-        borderColor: isLive ? 'rgb(245, 158, 11)' : 'rgb(217, 70, 239)', // Amber 500 : Fuchsia 500
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 4,

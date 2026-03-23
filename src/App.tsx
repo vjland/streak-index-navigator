@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   simulateShoe,
   calculateStreakIndex,
-  calculateMovingAverage,
   Outcome,
 } from "./baccarat";
 import { StreakChart } from "./components/StreakChart";
@@ -52,7 +51,6 @@ export default function App() {
 
   const currentOutcomes = mode === "demo" ? demoOutcomes : liveOutcomes;
   const streakIndex = calculateStreakIndex(currentOutcomes);
-  const maData = calculateMovingAverage(streakIndex, 5);
 
   const handleAddLiveOutcome = (outcome: Outcome) => {
     setLiveOutcomes((prev) => [...prev, outcome]);
@@ -189,7 +187,7 @@ export default function App() {
         >
           {streakIndex.length > 0 ? (
             <div className="absolute inset-0">
-              <StreakChart data={streakIndex} maData={maData} mode={mode} />
+              <StreakChart data={streakIndex} mode={mode} />
             </div>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">

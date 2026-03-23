@@ -84,22 +84,6 @@ function calculateStreakIndex(outcomes) {
     return index;
 }
 
-function calculateMovingAverage(data, period = 5) {
-    const ma = [];
-    for (let i = 0; i < data.length; i++) {
-        if (i < period - 1) {
-            ma.push(null);
-        } else {
-            let sum = 0;
-            for (let j = 0; j < period; j++) {
-                sum += data[i - j];
-            }
-            ma.push(sum / period);
-        }
-    }
-    return ma;
-}
-
 // App State
 let demoOutcomes = [];
 let liveOutcomes = [];
@@ -277,15 +261,12 @@ function updateUI() {
 
 function updateChart(outcomes) {
     const streakIndex = calculateStreakIndex(outcomes);
-    const maData = calculateMovingAverage(streakIndex, 5);
     
     const labels = Array.from({ length: 80 }, (_, i) => i + 1);
 
     if (chartInstance) {
         chartInstance.data.datasets[0].data = streakIndex;
-        chartInstance.data.datasets[1].data = maData;
         chartInstance.data.datasets[0].borderColor = mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)';
-        chartInstance.data.datasets[1].borderColor = mode === 'live' ? 'rgb(245, 158, 11)' : 'rgb(217, 70, 239)';
         chartInstance.update();
     } else {
         chartInstance = new Chart(ctx, {
@@ -297,16 +278,6 @@ function updateChart(outcomes) {
                         label: 'Streak Index',
                         data: streakIndex,
                         borderColor: mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 4,
-                        fill: false,
-                        tension: 0,
-                    },
-                    {
-                        label: '5-Period MA',
-                        data: maData,
-                        borderColor: mode === 'live' ? 'rgb(245, 158, 11)' : 'rgb(217, 70, 239)',
                         borderWidth: 2,
                         pointRadius: 0,
                         pointHoverRadius: 4,
