@@ -242,18 +242,22 @@ function updateUI() {
     if (hasData) {
         updateChart(currentOutcomes);
         
-        // Update last outcome
-        const last = currentOutcomes[currentOutcomes.length - 1];
-        lastOutcomeEl.textContent = last;
-        lastOutcomeEl.className = 'last-outcome'; // reset classes
-        if (last === 'P') {
-            lastOutcomeEl.classList.add('outcome-p');
-        } else if (last === 'B') {
-            lastOutcomeEl.classList.add('outcome-b');
+        if (mode === 'live') {
+            // Update last outcome
+            const last = currentOutcomes[currentOutcomes.length - 1];
+            lastOutcomeEl.textContent = last;
+            lastOutcomeEl.className = 'last-outcome'; // reset classes
+            if (last === 'P') {
+                lastOutcomeEl.classList.add('outcome-p');
+            } else if (last === 'B') {
+                lastOutcomeEl.classList.add('outcome-b');
+            } else {
+                lastOutcomeEl.classList.add('outcome-t');
+            }
+            lastOutcomeEl.classList.remove('hidden');
         } else {
-            lastOutcomeEl.classList.add('outcome-t');
+            lastOutcomeEl.classList.add('hidden');
         }
-        lastOutcomeEl.classList.remove('hidden');
     } else {
         lastOutcomeEl.classList.add('hidden');
     }

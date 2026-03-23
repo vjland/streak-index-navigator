@@ -68,21 +68,26 @@ export default function App() {
     <div className="h-[100dvh] overflow-hidden bg-zinc-950 text-zinc-100 font-sans flex flex-col">
       <header className="bg-zinc-900 border-b border-zinc-800/80 px-6 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-6">
-          <div className="flex items-center text-cyan-400" title="Streak Index">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="13 6 5 6 11 12 5 18 13 18" />
-              <line x1="19" y1="18" x2="19" y2="10" />
-              <line x1="19" y1="6" x2="19.01" y2="6" strokeWidth="3" />
-            </svg>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center text-cyan-400" title="Sigma-i Plus">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="13 6 5 6 11 12 5 18 13 18" />
+                <line x1="19" y1="18" x2="19" y2="10" />
+                <line x1="19" y1="6" x2="19.01" y2="6" strokeWidth="3" />
+              </svg>
+            </div>
+            <span className="text-lg font-bold tracking-tight text-zinc-100 hidden sm:inline">
+              Sigma-i Plus
+            </span>
           </div>
 
           <div className="flex items-center bg-zinc-950/50 rounded-lg p-1 border border-zinc-800/80">
@@ -103,7 +108,7 @@ export default function App() {
             </button>
           </div>
 
-          {currentOutcomes.length > 0 && (
+          {mode === "live" && currentOutcomes.length > 0 && (
             <div
               className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold ${
                 currentOutcomes[currentOutcomes.length - 1] === "P"

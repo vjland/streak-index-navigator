@@ -63,6 +63,19 @@ body {
     gap: 24px;
 }
 
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--zinc-100);
+}
+
 .logo {
     color: var(--cyan-400);
     display: flex;
