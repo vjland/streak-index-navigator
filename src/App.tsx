@@ -33,9 +33,11 @@ export default function App() {
 
       const key = e.key.toLowerCase();
       if (key === "p") {
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
         setMode("live");
         setLiveOutcomes((prev) => [...prev, "P"]);
       } else if (key === "b") {
+        if (navigator.vibrate) navigator.vibrate(100);
         setMode("live");
         setLiveOutcomes((prev) => [...prev, "B"]);
       } else if (e.key === "Backspace") {
@@ -53,6 +55,11 @@ export default function App() {
   const streakIndex = calculateStreakIndex(currentOutcomes);
 
   const handleAddLiveOutcome = (outcome: Outcome) => {
+    if (outcome === "P") {
+      if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+    } else if (outcome === "B") {
+      if (navigator.vibrate) navigator.vibrate(100);
+    }
     setLiveOutcomes((prev) => [...prev, outcome]);
   };
 

@@ -209,6 +209,11 @@ function handleNewDemoShoe() {
 }
 
 function handleAddLiveOutcome(outcome) {
+    if (outcome === 'P') {
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+    } else if (outcome === 'B') {
+        if (navigator.vibrate) navigator.vibrate(100);
+    }
     liveOutcomes.push(outcome);
     updateUI();
 }
