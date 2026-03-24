@@ -11,6 +11,8 @@ class BaccaratCalculator extends HTMLElement {
         this.sessions = [];
         this.isLogOpen = false;
         this.storageKey = 'baccarat_sessions_vanilla';
+        this.currentPeak = 0;
+        this.maxDrawdown = 0;
     }
 
     connectedCallback() {
@@ -29,6 +31,24 @@ class BaccaratCalculator extends HTMLElement {
         this.updateUI();
     }
 
+    recalculateStats() {
+        let currentNet = 0;
+        let peak = 0;
+        let maxDD = 0;
+        for (const delta of this.unitHistory) {
+            currentNet += delta;
+            if (currentNet > peak) {
+                peak = currentNet;
+            }
+            const dd = peak - currentNet;
+            if (dd > maxDD) {
+                maxDD = dd;
+            }
+        }
+        this.currentPeak = peak;
+        this.maxDrawdown = maxDD;
+    }
+
     handleUnitChange(delta) {
         if (this.sessionStartTime === null) {
             this.sessionStartTime = Date.now();
@@ -36,6 +56,7 @@ class BaccaratCalculator extends HTMLElement {
         this.netUnits += delta;
         this.steps += 1;
         this.unitHistory.push(delta);
+        this.recalculateStats();
         this.updateUI();
     }
 
@@ -47,6 +68,7 @@ class BaccaratCalculator extends HTMLElement {
             if (this.unitHistory.length === 0) {
                 this.sessionStartTime = null;
             }
+            this.recalculateStats();
             this.updateUI();
         }
     }
@@ -65,6 +87,7 @@ class BaccaratCalculator extends HTMLElement {
                 duration: durationStr,
                 net: this.netUnits,
                 steps: this.steps,
+                maxDrawdown: this.maxDrawdown,
                 model: 'Sigma'
             };
             
@@ -76,11 +99,24 @@ class BaccaratCalculator extends HTMLElement {
         this.steps = 0;
         this.unitHistory = [];
         this.sessionStartTime = null;
+        this.currentPeak = 0;
+        this.maxDrawdown = 0;
         this.updateUI();
     }
 
-    handleExportCSV() {
-        const headers = ['Date', 'Time', 'Duration', 'Steps', 'Net', 'Model'];
+    async handlePostData() {
+        if (this.sessions.length === 0) return;
+
+        const modal = this.shadowRoot.getElementById('post-modal-overlay');
+        const title = this.shadowRoot.getElementById('post-modal-title');
+        const message = this.shadowRoot.getElementById('post-modal-message');
+        const closeBtn = this.shadowRoot.getElementById('btn-post-modal-close');
+
+        modal.classList.remove('hidden');
+        title.textContent = 'Posting Data...';
+        message.textContent = 'Please wait while your session history is being saved.';
+        closeBtn.classList.add('hidden');
+
         const rows = this.sessions.map(session => {
             const datePart = session.date.includes(',') ? session.date.split(',')[0].trim() : session.date;
             const timePart = session.date.includes(',') ? session.date.split(',')[1]?.trim() : '';
@@ -90,6 +126,56 @@ class BaccaratCalculator extends HTMLElement {
                 session.duration,
                 session.steps || 0,
                 session.net,
+                -(session.maxDrawdown || 0),
+                session.model || 'Sigma'
+            ];
+        });
+
+        try {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbwo4niqEJg4EoXTGf0ik0b0H5IGou16IYmdHGWFeP_5lp2zFqxrCAOETnjP8_IN2BPL/exec', {
+                method: 'POST',
+                body: JSON.stringify(rows),
+            });
+
+            const resultText = await response.text();
+            let result;
+            try {
+                result = JSON.parse(resultText);
+            } catch (e) {
+                result = { status: resultText.toLowerCase().includes('success') ? 'success' : 'error', message: resultText };
+            }
+            
+            if (result.status === 'success' || result.result === 'success') {
+                title.textContent = 'Success';
+                message.textContent = `Session history successfully posted to Google Sheets. (${result.rows || rows.length} rows)`;
+            } else {
+                throw new Error(result.message || 'Unknown error from server');
+            }
+        } catch (error) {
+            title.textContent = 'Error';
+            const errMsg = error.message || String(error);
+            if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')) {
+                message.textContent = "Network error (CORS). This usually means your Google Apps Script threw an internal error (like getActiveSpreadsheet returning null) or needs to be redeployed as a New Version.";
+            } else {
+                message.textContent = 'Failed to post data: ' + errMsg;
+            }
+        } finally {
+            closeBtn.classList.remove('hidden');
+        }
+    }
+
+    handleExportCSV() {
+        const headers = ['Date', 'Time', 'Duration', 'Steps', 'Net', 'Max DD', 'Model'];
+        const rows = this.sessions.map(session => {
+            const datePart = session.date.includes(',') ? session.date.split(',')[0].trim() : session.date;
+            const timePart = session.date.includes(',') ? session.date.split(',')[1]?.trim() : '';
+            return [
+                datePart,
+                timePart,
+                session.duration,
+                session.steps || 0,
+                session.net,
+                session.maxDrawdown || 0,
                 session.model || 'Sigma'
             ].join(',');
         });
@@ -133,15 +219,20 @@ class BaccaratCalculator extends HTMLElement {
         this.shadowRoot.getElementById('btn-calc-undo').addEventListener('click', () => this.handleUndoUnitChange());
         this.shadowRoot.getElementById('btn-calc-refresh').addEventListener('click', () => this.handleRefreshCalculator());
         this.shadowRoot.getElementById('btn-calc-log').addEventListener('click', () => this.toggleCalcLog());
+        this.shadowRoot.getElementById('btn-calc-post').addEventListener('click', () => this.handlePostData());
         this.shadowRoot.getElementById('btn-calc-export-csv').addEventListener('click', () => this.handleExportCSV());
         this.shadowRoot.getElementById('btn-calc-clear-all').addEventListener('click', () => this.clearAllSessions());
         this.shadowRoot.getElementById('btn-modal-cancel').addEventListener('click', () => this.closeModal());
         this.shadowRoot.getElementById('btn-modal-confirm').addEventListener('click', () => this.confirmClearAll());
+        this.shadowRoot.getElementById('btn-post-modal-close').addEventListener('click', () => {
+            this.shadowRoot.getElementById('post-modal-overlay').classList.add('hidden');
+        });
     }
 
     updateUI() {
         // Value
         const calcNetValue = this.shadowRoot.getElementById('calc-net-value');
+        
         calcNetValue.textContent = (this.netUnits > 0 ? '+' : '') + this.netUnits;
         calcNetValue.className = 'calc-value';
         if (this.netUnits > 0) calcNetValue.classList.add('positive');
@@ -166,17 +257,20 @@ class BaccaratCalculator extends HTMLElement {
         const calcLogList = this.shadowRoot.getElementById('calc-log-list');
         const btnCalcClearAll = this.shadowRoot.getElementById('btn-calc-clear-all');
         const btnCalcExportCsv = this.shadowRoot.getElementById('btn-calc-export-csv');
+        const btnCalcPost = this.shadowRoot.getElementById('btn-calc-post');
 
         if (this.sessions.length === 0) {
             calcLogEmpty.style.display = 'block';
             calcLogList.style.display = 'none';
             btnCalcClearAll.classList.add('hidden');
             btnCalcExportCsv.classList.add('hidden');
+            btnCalcPost.classList.add('hidden');
         } else {
             calcLogEmpty.style.display = 'none';
             calcLogList.style.display = 'block';
             btnCalcClearAll.classList.remove('hidden');
             btnCalcExportCsv.classList.remove('hidden');
+            btnCalcPost.classList.remove('hidden');
             
             calcLogList.innerHTML = '';
             
@@ -209,6 +303,7 @@ class BaccaratCalculator extends HTMLElement {
                         <th>Time</th>
                         <th>Duration</th>
                         <th class="text-right">Steps</th>
+                        <th class="text-right">Max DD</th>
                         <th class="text-right">Net</th>
                         <th class="hidden">Model</th>
                     </tr>
@@ -222,12 +317,14 @@ class BaccaratCalculator extends HTMLElement {
                     const netClass = session.net > 0 ? 'text-emerald' : session.net < 0 ? 'text-rose' : 'text-zinc';
                     const netText = (session.net > 0 ? '+' : '') + session.net;
                     const stepsText = session.steps || 0;
+                    const maxDDText = session.maxDrawdown || 0;
                     const modelText = session.model || 'Sigma';
                     
                     tr.innerHTML = `
                         <td class="text-zinc-400">${timePart}</td>
                         <td class="text-zinc-300">${session.duration}</td>
                         <td class="text-zinc-300 text-right">${stepsText}</td>
+                        <td class="text-rose text-right">-${maxDDText}</td>
                         <td class="font-bold text-right ${netClass}">${netText}</td>
                         <td class="hidden">${modelText}</td>
                     `;
@@ -401,7 +498,7 @@ class BaccaratCalculator extends HTMLElement {
                     gap: 16px;
                 }
 
-                .btn-calc-export-csv {
+                .btn-calc-export-csv, .btn-calc-post {
                     background: none;
                     border: none;
                     color: var(--cyan-400);
@@ -412,11 +509,11 @@ class BaccaratCalculator extends HTMLElement {
                     transition: all 0.2s;
                 }
 
-                .btn-calc-export-csv:hover {
+                .btn-calc-export-csv:hover, .btn-calc-post:hover {
                     color: var(--cyan-300);
                 }
 
-                .btn-calc-export-csv.hidden {
+                .btn-calc-export-csv.hidden, .btn-calc-post.hidden {
                     display: none;
                 }
 
@@ -615,6 +712,7 @@ class BaccaratCalculator extends HTMLElement {
                     <div class="calc-log-header">
                         <h3>Session History</h3>
                         <div class="calc-log-header-actions">
+                            <button id="btn-calc-post" class="btn-calc-post hidden">Post</button>
                             <button id="btn-calc-export-csv" class="btn-calc-export-csv hidden">Export CSV</button>
                             <button id="btn-calc-clear-all" class="btn-calc-clear-all hidden">Clear All</button>
                         </div>
@@ -631,6 +729,16 @@ class BaccaratCalculator extends HTMLElement {
                     <div class="calc-modal-actions">
                         <button id="btn-modal-cancel" class="btn-modal-cancel">Cancel</button>
                         <button id="btn-modal-confirm" class="btn-modal-confirm">Clear All</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="post-modal-overlay" class="calc-modal-overlay hidden">
+                <div class="calc-modal">
+                    <h3 id="post-modal-title">Posting Data...</h3>
+                    <p id="post-modal-message">Please wait while your session history is being saved.</p>
+                    <div class="calc-modal-actions">
+                        <button id="btn-post-modal-close" class="btn-modal-cancel hidden">Close</button>
                     </div>
                 </div>
             </div>
