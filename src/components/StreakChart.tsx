@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +11,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import 'hammerjs';
+import { Download } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -28,7 +29,15 @@ interface StreakChartProps {
 }
 
 export function StreakChart({ data, mode }: StreakChartProps) {
+  const chartRef = useRef<any>(null);
   const isLive = mode === 'live';
+
+  const handleDownload = useCallback(() => {
+    const link = document.createElement('a');
+    link.download = `sigma-i-${new Date().toISOString().slice(0, 10)}.png`;
+    link.href = chartRef.current.toBase64Image();
+    link.click();
+  }, []);
   
   const chartData = {
     labels: Array.from({ length: 80 }, (_, i) => i + 1),
@@ -112,5 +121,21 @@ export function StreakChart({ data, mode }: StreakChartProps) {
     },
   };
 
-  return <Line data={chartData} options={options} />;
+  return (
+    <div className="relative w-full h-full">
+      {data.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm z-0">
+          {mode === "demo" ? "Simulating shoe..." : "Awaiting live input..."}
+        </div>
+      )}
+      <Line ref={chartRef} data={chartData} options={options} />
+      <button
+        onClick={handleDownload}
+        className="absolute top-4 left-4 p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm z-50"
+        title="Download Chart"
+      >
+        <Download size={16} />
+      </button>
+    </div>
+  );
 }

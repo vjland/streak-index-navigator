@@ -108,6 +108,7 @@ const ctx = document.getElementById('streakChart').getContext('2d');
 const confirmModal = document.getElementById('confirm-modal');
 const btnCancelClear = document.getElementById('btn-cancel-clear');
 const btnConfirmClear = document.getElementById('btn-confirm-clear');
+const btnDownloadChart = document.getElementById('btn-download-chart');
 
 // Calculator DOM
 const calculatorFooter = document.getElementById('calculator-footer');
@@ -145,6 +146,8 @@ function setupEventListeners() {
         handleClearLiveShoe();
         confirmModal.classList.add('hidden');
     });
+
+    btnDownloadChart.addEventListener('click', handleDownloadChart);
 
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -226,6 +229,16 @@ function handleUndoLiveOutcome() {
 function handleClearLiveShoe() {
     liveOutcomes = [];
     updateUI();
+}
+
+function handleDownloadChart() {
+    const canvas = document.getElementById('streakChart');
+    if (!canvas) return;
+    
+    const link = document.createElement('a');
+    link.download = `sigma-i-${new Date().toISOString().slice(0, 10)}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
 }
 
 // UI Updates

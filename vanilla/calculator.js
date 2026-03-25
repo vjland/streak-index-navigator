@@ -238,6 +238,14 @@ class BaccaratCalculator extends HTMLElement {
         if (this.netUnits > 0) calcNetValue.classList.add('positive');
         else if (this.netUnits < 0) calcNetValue.classList.add('negative');
 
+        // Session Indicator
+        const sessionIndicator = this.shadowRoot.getElementById('session-indicator');
+        if (this.sessionStartTime !== null) {
+            sessionIndicator.classList.add('active');
+        } else {
+            sessionIndicator.classList.remove('active');
+        }
+
         // Buttons
         this.shadowRoot.getElementById('btn-calc-undo').disabled = this.unitHistory.length === 0;
 
@@ -374,6 +382,45 @@ class BaccaratCalculator extends HTMLElement {
                     display: flex;
                     align-items: center;
                     gap: 16px;
+                }
+
+                .session-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-left: 12px;
+                    padding: 4px 6px;
+                    background-color: rgba(39, 39, 42, 0.4);
+                    border-radius: 9999px;
+                    border: 1px solid rgba(63, 63, 70, 0.3);
+                }
+
+                .session-indicator {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    background-color: var(--zinc-500);
+                    transition: all 0.3s ease;
+                }
+
+                .session-indicator.active {
+                    background-color: var(--emerald-400);
+                    box-shadow: 0 0 12px var(--emerald-400);
+                    animation: pulse 2s infinite;
+                }
+
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(1.3); opacity: 0.7; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+
+                .session-status {
+                    font-size: 11px;
+                    font-weight: 500;
+                    color: var(--zinc-400);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
                 }
 
                 .calc-value {
@@ -693,6 +740,9 @@ class BaccaratCalculator extends HTMLElement {
                 <div class="calc-header">
                     <div class="calc-net">
                         <span id="calc-net-value" class="calc-value">0</span>
+                        <div class="session-info">
+                            <div id="session-indicator" class="session-indicator"></div>
+                        </div>
                     </div>
                     <div class="calc-actions">
                         <button id="btn-calc-minus" class="btn-calc btn-calc-minus">-1</button>
