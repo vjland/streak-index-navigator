@@ -114,6 +114,7 @@ class BaccaratCalculator extends HTMLElement {
 
         modal.classList.remove('hidden');
         title.textContent = 'Posting Data...';
+        title.className = ''; // Reset color
         message.textContent = 'Please wait while your session history is being saved.';
         closeBtn.classList.add('hidden');
 
@@ -147,12 +148,14 @@ class BaccaratCalculator extends HTMLElement {
             
             if (result.status === 'success' || result.result === 'success') {
                 title.textContent = 'Success';
+                title.className = 'text-emerald';
                 message.textContent = `Session history successfully posted to Google Sheets. (${result.rows || rows.length} rows)`;
             } else {
                 throw new Error(result.message || 'Unknown error from server');
             }
         } catch (error) {
             title.textContent = 'Error';
+            title.className = 'text-rose';
             const errMsg = error.message || String(error);
             if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')) {
                 message.textContent = "Network error (CORS). This usually means your Google Apps Script threw an internal error (like getActiveSpreadsheet returning null) or needs to be redeployed as a New Version.";
@@ -219,7 +222,18 @@ class BaccaratCalculator extends HTMLElement {
         this.shadowRoot.getElementById('btn-calc-undo').addEventListener('click', () => this.handleUndoUnitChange());
         this.shadowRoot.getElementById('btn-calc-refresh').addEventListener('click', () => this.handleRefreshCalculator());
         this.shadowRoot.getElementById('btn-calc-log').addEventListener('click', () => this.toggleCalcLog());
-        this.shadowRoot.getElementById('btn-calc-post').addEventListener('click', () => this.handlePostData());
+        this.shadowRoot.getElementById('btn-calc-post').addEventListener('click', () => {
+            if (this.sessions.length > 0) {
+                this.shadowRoot.getElementById('post-confirm-modal-overlay').classList.remove('hidden');
+            }
+        });
+        this.shadowRoot.getElementById('btn-post-confirm-cancel').addEventListener('click', () => {
+            this.shadowRoot.getElementById('post-confirm-modal-overlay').classList.add('hidden');
+        });
+        this.shadowRoot.getElementById('btn-post-confirm-confirm').addEventListener('click', () => {
+            this.shadowRoot.getElementById('post-confirm-modal-overlay').classList.add('hidden');
+            this.handlePostData();
+        });
         this.shadowRoot.getElementById('btn-calc-export-csv').addEventListener('click', () => this.handleExportCSV());
         this.shadowRoot.getElementById('btn-calc-clear-all').addEventListener('click', () => this.clearAllSessions());
         this.shadowRoot.getElementById('btn-modal-cancel').addEventListener('click', () => this.closeModal());
@@ -656,8 +670,8 @@ class BaccaratCalculator extends HTMLElement {
                 .text-right { text-align: right; }
                 .text-zinc-400 { color: var(--zinc-400); }
                 .text-zinc-300 { color: var(--zinc-300); }
-                .text-emerald { color: var(--emerald-400); }
-                .text-rose { color: var(--rose-400); }
+                .text-emerald { color: var(--emerald-400) !important; }
+                .text-rose { color: var(--rose-400) !important; }
                 .text-zinc { color: var(--zinc-400); }
                 .font-bold { font-weight: 700; }
                 .hidden { display: none !important; }
@@ -734,6 +748,22 @@ class BaccaratCalculator extends HTMLElement {
                 .btn-modal-confirm:hover {
                     background-color: rgba(244, 63, 94, 0.2);
                 }
+
+                .btn-modal-post {
+                    background-color: rgba(34, 211, 238, 0.1);
+                    border: 1px solid rgba(34, 211, 238, 0.2);
+                    color: var(--cyan-400);
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: 500;
+                    font-size: 14px;
+                    transition: background-color 0.2s;
+                }
+
+                .btn-modal-post:hover {
+                    background-color: rgba(34, 211, 238, 0.2);
+                }
             </style>
             
             <div class="calc-container">
@@ -769,6 +799,17 @@ class BaccaratCalculator extends HTMLElement {
                     </div>
                     <div id="calc-log-empty" class="calc-log-empty">No sessions recorded yet.</div>
                     <div id="calc-log-list" class="calc-log-list"></div>
+                </div>
+            </div>
+
+            <div id="post-confirm-modal-overlay" class="calc-modal-overlay hidden">
+                <div class="calc-modal">
+                    <h3>Confirm Post?</h3>
+                    <p>Are you sure you want to post your session history to Google Sheets?</p>
+                    <div class="calc-modal-actions">
+                        <button id="btn-post-confirm-cancel" class="btn-modal-cancel">Cancel</button>
+                        <button id="btn-post-confirm-confirm" class="btn-modal-post">Confirm</button>
+                    </div>
                 </div>
             </div>
 
