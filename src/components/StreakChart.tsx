@@ -153,21 +153,23 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         </div>
       )}
       <Line ref={chartRef} data={chartData} options={options} />
-      <div className="absolute top-4 left-16 flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-100 px-3 py-1.5 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm z-50 cursor-pointer select-none"
-        onClick={() => setShowMA(!showMA)}
-      >
-        <div className={`w-8 h-4 rounded-full transition-colors relative ${showMA ? 'bg-emerald-500' : 'bg-zinc-600'}`}>
-          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${showMA ? 'left-4.5' : 'left-0.5'}`} />
+      <div className="absolute top-4 left-4 flex items-center gap-3 z-50">
+        <button
+          onClick={handleDownload}
+          className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm"
+          title="Download Chart"
+        >
+          <Download size={16} />
+        </button>
+        <div className="flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-100 px-3 py-1.5 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm cursor-pointer select-none"
+          onClick={() => setShowMA(!showMA)}
+        >
+          <div className={`w-8 h-4 rounded-full transition-colors relative ${showMA ? 'bg-emerald-500' : 'bg-zinc-600'}`}>
+            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${showMA ? 'left-4.5' : 'left-0.5'}`} />
+          </div>
+          <span className="text-[10px] font-medium uppercase tracking-wider">MA(9)</span>
         </div>
-        <span className="text-[10px] font-medium uppercase tracking-wider">MA(9)</span>
       </div>
-      <button
-        onClick={handleDownload}
-        className="absolute top-4 left-4 p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm z-50"
-        title="Download Chart"
-      >
-        <Download size={16} />
-      </button>
     </div>
   );
 }
