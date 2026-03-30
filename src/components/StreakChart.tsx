@@ -31,20 +31,21 @@ interface StreakChartProps {
 export function StreakChart({ data, mode }: StreakChartProps) {
   const chartRef = useRef<any>(null);
   const [showMA, setShowMA] = useState(false);
+  const [maPeriod, setMaPeriod] = useState<6 | 9>(9);
   const isLive = mode === 'live';
 
   const movingAverage = useMemo(() => {
-    if (data.length < 9) return [];
+    if (data.length < maPeriod) return [];
     const ma = new Array(data.length).fill(null);
-    for (let i = 8; i < data.length; i++) {
+    for (let i = maPeriod - 1; i < data.length; i++) {
       let sum = 0;
-      for (let j = 0; j < 9; j++) {
+      for (let j = 0; j < maPeriod; j++) {
         sum += data[i - j];
       }
-      ma[i] = sum / 9;
+      ma[i] = sum / maPeriod;
     }
     return ma;
-  }, [data]);
+  }, [data, maPeriod]);
 
   const handleDownload = useCallback(() => {
     const link = document.createElement('a');
@@ -67,7 +68,7 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         tension: 0.1,
       },
       {
-        label: '9-Period MA',
+        label: `${maPeriod}-Period MA`,
         data: movingAverage,
         borderColor: 'rgba(255, 255, 255, 0.5)',
         borderWidth: 1,
@@ -161,13 +162,32 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         >
           <Download size={16} />
         </button>
-        <div className="flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-100 px-3 py-1.5 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm cursor-pointer select-none"
-          onClick={() => setShowMA(!showMA)}
-        >
-          <div className={`w-8 h-4 rounded-full transition-colors relative ${showMA ? 'bg-emerald-500' : 'bg-zinc-600'}`}>
-            <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${showMA ? 'left-4.5' : 'left-0.5'}`} />
+        <div className="flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-100 px-3 py-1.5 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm select-none z-50">
+          <div 
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => setShowMA(!showMA)}
+          >
+            <div className={`w-8 h-4 rounded-full transition-colors relative ${showMA ? 'bg-emerald-500' : 'bg-zinc-600'}`}>
+              <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${showMA ? 'left-4.5' : 'left-0.5'}`} />
+            </div>
+            <span className="text-[10px] font-medium uppercase tracking-wider">MA</span>
           </div>
-          <span className="text-[10px] font-medium uppercase tracking-wider">MA(9)</span>
+          <div className="w-px h-3 bg-zinc-700 mx-1" />
+          <div className="flex gap-1">
+            {[6, 9].map((p) => (
+              <button
+                key={p}
+                onClick={() => setMaPeriod(p as 6 | 9)}
+                className={`text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded transition-all ${
+                  maPeriod === p 
+                    ? 'bg-zinc-100 text-zinc-900' 
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

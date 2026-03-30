@@ -103,6 +103,7 @@ let liveOutcomes = [];
 let mode = 'demo'; // 'demo' | 'live'
 let isInputOpen = false;
 let showMA = false;
+let maPeriod = 9;
 let chartInstance = null;
 
 // DOM Elements
@@ -124,6 +125,8 @@ const btnCancelClear = document.getElementById('btn-cancel-clear');
 const btnConfirmClear = document.getElementById('btn-confirm-clear');
 const btnDownloadChart = document.getElementById('btn-download-chart');
 const btnToggleMA = document.getElementById('btn-toggle-ma');
+const toggleGroup = document.querySelector('.toggle-group');
+const periodBtns = document.querySelectorAll('.period-btn');
 
 // Calculator DOM
 const calculatorFooter = document.getElementById('calculator-footer');
@@ -164,10 +167,18 @@ function setupEventListeners() {
 
     btnDownloadChart.addEventListener('click', handleDownloadChart);
 
-    btnToggleMA.addEventListener('click', () => {
+    toggleGroup.addEventListener('click', () => {
         showMA = !showMA;
         btnToggleMA.classList.toggle('active', showMA);
         updateUI();
+    });
+
+    periodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            maPeriod = parseInt(btn.dataset.period);
+            periodBtns.forEach(b => b.classList.toggle('active', b === btn));
+            updateUI();
+        });
     });
 
     document.addEventListener('keydown', (e) => {
@@ -305,13 +316,14 @@ function updateUI() {
 
 function updateChart(outcomes) {
     const streakIndex = calculateStreakIndex(outcomes);
-    const maData = calculateMA(streakIndex);
+    const maData = calculateMA(streakIndex, maPeriod);
     
     const labels = Array.from({ length: 80 }, (_, i) => i + 1);
 
     if (chartInstance) {
         chartInstance.data.datasets[0].data = streakIndex;
         chartInstance.data.datasets[0].borderColor = mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)';
+        chartInstance.data.datasets[1].label = `${maPeriod}-Period MA`;
         chartInstance.data.datasets[1].data = maData;
         chartInstance.data.datasets[1].hidden = !showMA;
         chartInstance.update();
@@ -332,7 +344,7 @@ function updateChart(outcomes) {
                         tension: 0.1,
                     },
                     {
-                        label: '9-Period MA',
+                        label: `${maPeriod}-Period MA`,
                         data: maData,
                         borderColor: 'rgba(255, 255, 255, 0.5)',
                         borderWidth: 1,
