@@ -84,11 +84,25 @@ function calculateStreakIndex(outcomes) {
     return index;
 }
 
+function calculateMA(data, period = 9) {
+    if (data.length < period) return [];
+    const ma = new Array(data.length).fill(null);
+    for (let i = period - 1; i < data.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < period; j++) {
+            sum += data[i - j];
+        }
+        ma[i] = sum / period;
+    }
+    return ma;
+}
+
 // App State
 let demoOutcomes = [];
 let liveOutcomes = [];
 let mode = 'demo'; // 'demo' | 'live'
 let isInputOpen = false;
+let showMA = false;
 let chartInstance = null;
 
 // DOM Elements
@@ -109,6 +123,7 @@ const confirmModal = document.getElementById('confirm-modal');
 const btnCancelClear = document.getElementById('btn-cancel-clear');
 const btnConfirmClear = document.getElementById('btn-confirm-clear');
 const btnDownloadChart = document.getElementById('btn-download-chart');
+const btnToggleMA = document.getElementById('btn-toggle-ma');
 
 // Calculator DOM
 const calculatorFooter = document.getElementById('calculator-footer');
@@ -148,6 +163,12 @@ function setupEventListeners() {
     });
 
     btnDownloadChart.addEventListener('click', handleDownloadChart);
+
+    btnToggleMA.addEventListener('click', () => {
+        showMA = !showMA;
+        btnToggleMA.classList.toggle('active', showMA);
+        updateUI();
+    });
 
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -284,12 +305,15 @@ function updateUI() {
 
 function updateChart(outcomes) {
     const streakIndex = calculateStreakIndex(outcomes);
+    const maData = calculateMA(streakIndex);
     
     const labels = Array.from({ length: 80 }, (_, i) => i + 1);
 
     if (chartInstance) {
         chartInstance.data.datasets[0].data = streakIndex;
         chartInstance.data.datasets[0].borderColor = mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)';
+        chartInstance.data.datasets[1].data = maData;
+        chartInstance.data.datasets[1].hidden = !showMA;
         chartInstance.update();
     } else {
         chartInstance = new Chart(ctx, {
@@ -306,6 +330,16 @@ function updateChart(outcomes) {
                         pointHoverRadius: 4,
                         fill: false,
                         tension: 0.1,
+                    },
+                    {
+                        label: '9-Period MA',
+                        data: maData,
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0.4,
+                        hidden: !showMA,
                     }
                 ]
             },

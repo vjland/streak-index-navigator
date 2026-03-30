@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState, useMemo } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -30,7 +30,21 @@ interface StreakChartProps {
 
 export function StreakChart({ data, mode }: StreakChartProps) {
   const chartRef = useRef<any>(null);
+  const [showMA, setShowMA] = useState(false);
   const isLive = mode === 'live';
+
+  const movingAverage = useMemo(() => {
+    if (data.length < 9) return [];
+    const ma = new Array(data.length).fill(null);
+    for (let i = 8; i < data.length; i++) {
+      let sum = 0;
+      for (let j = 0; j < 9; j++) {
+        sum += data[i - j];
+      }
+      ma[i] = sum / 9;
+    }
+    return ma;
+  }, [data]);
 
   const handleDownload = useCallback(() => {
     const link = document.createElement('a');
@@ -51,6 +65,16 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         pointHoverRadius: 4,
         fill: false,
         tension: 0.1,
+      },
+      {
+        label: '9-Period MA',
+        data: movingAverage,
+        borderColor: 'rgba(255, 255, 255, 0.5)',
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+        tension: 0.4,
+        hidden: !showMA,
       }
     ],
   };
@@ -129,6 +153,14 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         </div>
       )}
       <Line ref={chartRef} data={chartData} options={options} />
+      <div className="absolute top-4 left-16 flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-100 px-3 py-1.5 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm z-50 cursor-pointer select-none"
+        onClick={() => setShowMA(!showMA)}
+      >
+        <div className={`w-8 h-4 rounded-full transition-colors relative ${showMA ? 'bg-emerald-500' : 'bg-zinc-600'}`}>
+          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${showMA ? 'left-4.5' : 'left-0.5'}`} />
+        </div>
+        <span className="text-[10px] font-medium uppercase tracking-wider">MA(9)</span>
+      </div>
       <button
         onClick={handleDownload}
         className="absolute top-4 left-4 p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm z-50"
