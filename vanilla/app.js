@@ -103,7 +103,7 @@ let liveOutcomes = [];
 let mode = 'demo'; // 'demo' | 'live'
 let isInputOpen = false;
 let showMA = false;
-let maPeriod = 9;
+let maPeriods = [8];
 let chartInstance = null;
 
 // DOM Elements
@@ -175,8 +175,14 @@ function setupEventListeners() {
 
     periodBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            maPeriod = parseInt(btn.dataset.period);
-            periodBtns.forEach(b => b.classList.toggle('active', b === btn));
+            const p = parseInt(btn.dataset.period);
+            if (maPeriods.includes(p)) {
+                maPeriods = maPeriods.filter(x => x !== p);
+                btn.classList.remove('active');
+            } else {
+                maPeriods.push(p);
+                btn.classList.add('active');
+            }
             updateUI();
         });
     });
@@ -316,16 +322,21 @@ function updateUI() {
 
 function updateChart(outcomes) {
     const streakIndex = calculateStreakIndex(outcomes);
-    const maData = calculateMA(streakIndex, maPeriod);
+    const maData8 = calculateMA(streakIndex, 8);
+    const maData13 = calculateMA(streakIndex, 13);
     
     const labels = Array.from({ length: 80 }, (_, i) => i + 1);
 
     if (chartInstance) {
         chartInstance.data.datasets[0].data = streakIndex;
         chartInstance.data.datasets[0].borderColor = mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)';
-        chartInstance.data.datasets[1].label = `${maPeriod}-Period MA`;
-        chartInstance.data.datasets[1].data = maData;
-        chartInstance.data.datasets[1].hidden = !showMA;
+        
+        chartInstance.data.datasets[1].data = maData8;
+        chartInstance.data.datasets[1].hidden = !showMA || !maPeriods.includes(8);
+        
+        chartInstance.data.datasets[2].data = maData13;
+        chartInstance.data.datasets[2].hidden = !showMA || !maPeriods.includes(13);
+        
         chartInstance.update();
     } else {
         chartInstance = new Chart(ctx, {
@@ -344,14 +355,24 @@ function updateChart(outcomes) {
                         tension: 0.1,
                     },
                     {
-                        label: `${maPeriod}-Period MA`,
-                        data: maData,
+                        label: `8-Period MA`,
+                        data: maData8,
                         borderColor: 'rgba(255, 255, 255, 0.5)',
                         borderWidth: 1,
                         pointRadius: 0,
                         fill: false,
                         tension: 0.4,
-                        hidden: !showMA,
+                        hidden: !showMA || !maPeriods.includes(8),
+                    },
+                    {
+                        label: `13-Period MA`,
+                        data: maData13,
+                        borderColor: 'rgba(236, 72, 153, 0.5)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0.4,
+                        hidden: !showMA || !maPeriods.includes(13),
                     }
                 ]
             },

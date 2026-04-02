@@ -461,7 +461,7 @@ canvas {
 }
 
 .period-btn {
-    width: 20px;
+    width: 24px;
     height: 20px;
     display: flex;
     align-items: center;
@@ -484,6 +484,11 @@ canvas {
 .period-btn.active {
     background-color: var(--zinc-100);
     color: var(--zinc-900);
+}
+
+.period-btn[data-period="13"].active {
+    background-color: #ec4899;
+    color: white;
 }
 
 .toggle-track {

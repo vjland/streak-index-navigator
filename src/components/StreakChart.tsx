@@ -31,21 +31,24 @@ interface StreakChartProps {
 export function StreakChart({ data, mode }: StreakChartProps) {
   const chartRef = useRef<any>(null);
   const [showMA, setShowMA] = useState(false);
-  const [maPeriod, setMaPeriod] = useState<6 | 9>(9);
+  const [maPeriods, setMaPeriods] = useState<number[]>([8]);
   const isLive = mode === 'live';
 
-  const movingAverage = useMemo(() => {
-    if (data.length < maPeriod) return [];
+  const calculateMA = useCallback((data: number[], period: number) => {
+    if (data.length < period) return [];
     const ma = new Array(data.length).fill(null);
-    for (let i = maPeriod - 1; i < data.length; i++) {
+    for (let i = period - 1; i < data.length; i++) {
       let sum = 0;
-      for (let j = 0; j < maPeriod; j++) {
+      for (let j = 0; j < period; j++) {
         sum += data[i - j];
       }
-      ma[i] = sum / maPeriod;
+      ma[i] = sum / period;
     }
     return ma;
-  }, [data, maPeriod]);
+  }, []);
+
+  const movingAverage8 = useMemo(() => calculateMA(data, 8), [data, calculateMA]);
+  const movingAverage13 = useMemo(() => calculateMA(data, 13), [data, calculateMA]);
 
   const handleDownload = useCallback(() => {
     const link = document.createElement('a');
@@ -68,14 +71,24 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         tension: 0.1,
       },
       {
-        label: `${maPeriod}-Period MA`,
-        data: movingAverage,
+        label: `8-Period MA`,
+        data: movingAverage8,
         borderColor: 'rgba(255, 255, 255, 0.5)',
         borderWidth: 1,
         pointRadius: 0,
         fill: false,
         tension: 0.4,
-        hidden: !showMA,
+        hidden: !showMA || !maPeriods.includes(8),
+      },
+      {
+        label: `13-Period MA`,
+        data: movingAverage13,
+        borderColor: 'rgba(236, 72, 153, 0.5)', // Pink color for distinction
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+        tension: 0.4,
+        hidden: !showMA || !maPeriods.includes(13),
       }
     ],
   };
@@ -174,13 +187,20 @@ export function StreakChart({ data, mode }: StreakChartProps) {
           </div>
           <div className="w-px h-3 bg-zinc-700 mx-1" />
           <div className="flex gap-1">
-            {[6, 9].map((p) => (
+            {[8, 13].map((p) => (
               <button
                 key={p}
-                onClick={() => setMaPeriod(p as 6 | 9)}
-                className={`text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded transition-all ${
-                  maPeriod === p 
-                    ? 'bg-zinc-100 text-zinc-900' 
+                onClick={() => {
+                  setMaPeriods(prev => {
+                    if (prev.includes(p)) {
+                      return prev.filter(x => x !== p);
+                    }
+                    return [...prev, p];
+                  });
+                }}
+                className={`text-[10px] font-bold w-6 h-5 flex items-center justify-center rounded transition-all ${
+                  maPeriods.includes(p) 
+                    ? (p === 13 ? 'bg-pink-500 text-white' : 'bg-zinc-100 text-zinc-900')
                     : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700'
                 }`}
               >
