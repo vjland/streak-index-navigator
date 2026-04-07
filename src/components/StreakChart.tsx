@@ -34,8 +34,8 @@ export function StreakChart({ data, mode }: StreakChartProps) {
 
   const movingAverage = useMemo(() => {
     const period = 9;
-    if (data.length < period) return [];
     const ma = new Array(data.length).fill(null);
+    if (data.length < period) return ma;
     for (let i = period - 1; i < data.length; i++) {
       let sum = 0;
       for (let j = 0; j < period; j++) {
@@ -74,6 +74,7 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         pointRadius: 0,
         fill: false,
         tension: 0.4,
+        hidden: false,
       }
     ],
   };

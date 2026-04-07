@@ -85,8 +85,8 @@ function calculateStreakIndex(outcomes) {
 }
 
 function calculateMA(data, period = 9) {
-    if (data.length < period) return [];
     const ma = new Array(data.length).fill(null);
+    if (data.length < period) return ma;
     for (let i = period - 1; i < data.length; i++) {
         let sum = 0;
         for (let j = 0; j < period; j++) {
@@ -306,6 +306,7 @@ function updateChart(outcomes) {
         chartInstance.data.datasets[0].borderColor = mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)';
         
         chartInstance.data.datasets[1].data = maData;
+        chartInstance.data.datasets[1].hidden = false;
         
         chartInstance.update();
     } else {
@@ -332,6 +333,7 @@ function updateChart(outcomes) {
                         pointRadius: 0,
                         fill: false,
                         tension: 0.4,
+                        hidden: false,
                     }
                 ]
             },
