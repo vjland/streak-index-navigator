@@ -30,11 +30,10 @@ interface StreakChartProps {
 
 export function StreakChart({ data, mode }: StreakChartProps) {
   const chartRef = useRef<any>(null);
-  const [showMA, setShowMA] = useState(false);
-  const [maPeriods, setMaPeriods] = useState<number[]>([8]);
   const isLive = mode === 'live';
 
-  const calculateMA = useCallback((data: number[], period: number) => {
+  const movingAverage = useMemo(() => {
+    const period = 9;
     if (data.length < period) return [];
     const ma = new Array(data.length).fill(null);
     for (let i = period - 1; i < data.length; i++) {
@@ -45,10 +44,7 @@ export function StreakChart({ data, mode }: StreakChartProps) {
       ma[i] = sum / period;
     }
     return ma;
-  }, []);
-
-  const movingAverage8 = useMemo(() => calculateMA(data, 8), [data, calculateMA]);
-  const movingAverage13 = useMemo(() => calculateMA(data, 13), [data, calculateMA]);
+  }, [data]);
 
   const handleDownload = useCallback(() => {
     const link = document.createElement('a');
@@ -71,24 +67,13 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         tension: 0.1,
       },
       {
-        label: `8-Period MA`,
-        data: movingAverage8,
+        label: `9-Period MA`,
+        data: movingAverage,
         borderColor: 'rgba(255, 255, 255, 0.5)',
         borderWidth: 1,
         pointRadius: 0,
         fill: false,
         tension: 0.4,
-        hidden: !showMA || !maPeriods.includes(8),
-      },
-      {
-        label: `13-Period MA`,
-        data: movingAverage13,
-        borderColor: 'rgba(236, 72, 153, 0.5)', // Pink color for distinction
-        borderWidth: 1,
-        pointRadius: 0,
-        fill: false,
-        tension: 0.4,
-        hidden: !showMA || !maPeriods.includes(13),
       }
     ],
   };
@@ -175,40 +160,6 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         >
           <Download size={16} />
         </button>
-        <div className="flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-100 px-3 py-1.5 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm select-none z-50">
-          <div 
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => setShowMA(!showMA)}
-          >
-            <div className={`w-8 h-4 rounded-full transition-colors relative ${showMA ? 'bg-emerald-500' : 'bg-zinc-600'}`}>
-              <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${showMA ? 'left-4.5' : 'left-0.5'}`} />
-            </div>
-            <span className="text-[10px] font-medium uppercase tracking-wider">MA</span>
-          </div>
-          <div className="w-px h-3 bg-zinc-700 mx-1" />
-          <div className="flex gap-1">
-            {[8, 13].map((p) => (
-              <button
-                key={p}
-                onClick={() => {
-                  setMaPeriods(prev => {
-                    if (prev.includes(p)) {
-                      return prev.filter(x => x !== p);
-                    }
-                    return [...prev, p];
-                  });
-                }}
-                className={`text-[10px] font-bold w-6 h-5 flex items-center justify-center rounded transition-all ${
-                  maPeriods.includes(p) 
-                    ? (p === 13 ? 'bg-pink-500 text-white' : 'bg-zinc-100 text-zinc-900')
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
