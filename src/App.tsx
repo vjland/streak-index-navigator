@@ -198,7 +198,7 @@ export default function App() {
           className={`flex-1 min-h-0 flex flex-col relative overflow-hidden transition-colors duration-300 ${mode === "live" ? "bg-slate-900" : "bg-zinc-900"}`}
         >
           <div className="absolute inset-0">
-            <StreakChart data={streakIndex} mode={mode} />
+            <StreakChart data={streakIndex} mode={mode} rawOutcomes={currentOutcomes} />
           </div>
         </div>
 

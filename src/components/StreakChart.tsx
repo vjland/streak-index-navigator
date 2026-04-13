@@ -11,7 +11,9 @@ import {
 import { Line } from 'react-chartjs-2';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import 'hammerjs';
-import { Download } from 'lucide-react';
+import { Download, Grid3X3 } from 'lucide-react';
+import { Outcome } from '../baccarat';
+import { BigRoad } from './BigRoad';
 
 ChartJS.register(
   CategoryScale,
@@ -26,14 +28,16 @@ ChartJS.register(
 interface StreakChartProps {
   data: number[];
   mode: 'demo' | 'live';
+  rawOutcomes?: Outcome[];
 }
 
-export function StreakChart({ data, mode }: StreakChartProps) {
+export function StreakChart({ data, mode, rawOutcomes = [] }: StreakChartProps) {
   const chartRef = useRef<any>(null);
   const isLive = mode === 'live';
+  const [showBigRoad, setShowBigRoad] = useState(true);
+  const [maPeriods, setMaPeriods] = useState<number[]>([9]);
 
-  const movingAverage = useMemo(() => {
-    const period = 9;
+  const calculateMA = useCallback((period: number) => {
     const ma = new Array(data.length).fill(null);
     if (data.length < period) return ma;
     for (let i = period - 1; i < data.length; i++) {
@@ -45,6 +49,15 @@ export function StreakChart({ data, mode }: StreakChartProps) {
     }
     return ma;
   }, [data]);
+
+  const ma6 = useMemo(() => calculateMA(6), [calculateMA]);
+  const ma9 = useMemo(() => calculateMA(9), [calculateMA]);
+
+  const toggleMA = (period: number) => {
+    setMaPeriods(prev => 
+      prev.includes(period) ? prev.filter(p => p !== period) : [...prev, period]
+    );
+  };
 
   const handleDownload = useCallback(() => {
     const link = document.createElement('a');
@@ -64,17 +77,27 @@ export function StreakChart({ data, mode }: StreakChartProps) {
         pointRadius: 0,
         pointHoverRadius: 4,
         fill: false,
-        tension: 0.1,
+        tension: 0.3,
+      },
+      {
+        label: `6-Period MA`,
+        data: ma6,
+        borderColor: 'rgba(156, 163, 175, 0.5)', // gray-400
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+        tension: 0.4,
+        hidden: !maPeriods.includes(6),
       },
       {
         label: `9-Period MA`,
-        data: movingAverage,
+        data: ma9,
         borderColor: 'rgba(255, 255, 255, 0.5)',
         borderWidth: 1,
         pointRadius: 0,
         fill: false,
         tension: 0.4,
-        hidden: false,
+        hidden: !maPeriods.includes(9),
       }
     ],
   };
@@ -146,22 +169,57 @@ export function StreakChart({ data, mode }: StreakChartProps) {
   };
 
   return (
-    <div className="relative w-full h-full">
-      {data.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm z-0">
-          {mode === "demo" ? "Simulating shoe..." : "Awaiting live input..."}
+    <div className="relative w-full h-full flex flex-col">
+      <div className="relative flex-1 min-h-0">
+        {data.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm z-0">
+            {mode === "demo" ? "Simulating shoe..." : "Awaiting live input..."}
+          </div>
+        )}
+        <Line ref={chartRef} data={chartData} options={options} />
+        <div className="absolute top-4 left-4 flex items-center gap-2 bg-zinc-900/80 p-1 rounded-lg border border-zinc-800 backdrop-blur-sm z-50">
+          <button
+            onClick={handleDownload}
+            className="p-1.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-md transition-colors"
+            title="Download Chart"
+          >
+            <Download size={16} />
+          </button>
+          
+          <div className="w-px h-4 bg-zinc-700" />
+          
+          <div className="flex gap-1">
+            <button 
+              onClick={() => toggleMA(6)} 
+              className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${maPeriods.includes(6) ? 'bg-blue-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              6
+            </button>
+            <button 
+              onClick={() => toggleMA(9)} 
+              className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${maPeriods.includes(9) ? 'bg-blue-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              9
+            </button>
+          </div>
+
+          <div className="w-px h-4 bg-zinc-700" />
+          
+          <button 
+            onClick={() => setShowBigRoad(!showBigRoad)} 
+            className={`p-1.5 rounded-md transition-colors ${showBigRoad ? 'bg-blue-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+            title="Toggle Big Road"
+          >
+            <Grid3X3 size={16} />
+          </button>
+        </div>
+      </div>
+      
+      {showBigRoad && (
+        <div className="flex-none">
+          <BigRoad outcomes={rawOutcomes} mode={mode} />
         </div>
       )}
-      <Line ref={chartRef} data={chartData} options={options} />
-      <div className="absolute top-4 left-4 flex items-center gap-3 z-50">
-        <button
-          onClick={handleDownload}
-          className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg border border-zinc-700 transition-all shadow-xl backdrop-blur-sm"
-          title="Download Chart"
-        >
-          <Download size={16} />
-        </button>
-      </div>
     </div>
   );
 }

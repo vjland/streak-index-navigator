@@ -102,6 +102,8 @@ let demoOutcomes = [];
 let liveOutcomes = [];
 let mode = 'demo'; // 'demo' | 'live'
 let isInputOpen = false;
+let showBigRoad = true;
+let maPeriods = [9];
 let chartInstance = null;
 
 // DOM Elements
@@ -122,6 +124,10 @@ const confirmModal = document.getElementById('confirm-modal');
 const btnCancelClear = document.getElementById('btn-cancel-clear');
 const btnConfirmClear = document.getElementById('btn-confirm-clear');
 const btnDownloadChart = document.getElementById('btn-download-chart');
+const btnToggleBigRoad = document.getElementById('btn-toggle-bigroad');
+const periodBtns = document.querySelectorAll('.period-btn');
+const bigRoadContainer = document.getElementById('big-road-container');
+const bigRoadScroll = document.getElementById('big-road-scroll');
 
 // Calculator DOM
 const calculatorFooter = document.getElementById('calculator-footer');
@@ -161,6 +167,26 @@ function setupEventListeners() {
     });
 
     btnDownloadChart.addEventListener('click', handleDownloadChart);
+
+    btnToggleBigRoad.addEventListener('click', () => {
+        showBigRoad = !showBigRoad;
+        btnToggleBigRoad.classList.toggle('active', showBigRoad);
+        updateUI();
+    });
+
+    periodBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const p = parseInt(btn.dataset.period);
+            if (maPeriods.includes(p)) {
+                maPeriods = maPeriods.filter(x => x !== p);
+                btn.classList.remove('active');
+            } else {
+                maPeriods.push(p);
+                btn.classList.add('active');
+            }
+            updateChart(mode === 'demo' ? demoOutcomes : liveOutcomes);
+        });
+    });
 
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -270,6 +296,12 @@ function updateUI() {
     btnUndo.disabled = liveOutcomes.length === 0;
     btnClear.disabled = liveOutcomes.length === 0;
 
+    if (showBigRoad) {
+        bigRoadContainer.classList.remove('hidden');
+    } else {
+        bigRoadContainer.classList.add('hidden');
+    }
+
     if (hasData) {
         updateChart(currentOutcomes);
         
@@ -293,11 +325,114 @@ function updateUI() {
     } else {
         lastOutcomeEl.classList.add('hidden');
     }
+
+    if (showBigRoad) {
+        drawBigRoad(currentOutcomes);
+    }
+}
+
+function drawBigRoad(outcomes) {
+    const cells = [];
+    let currentX = 0;
+    let currentY = 0;
+    let currentStreakOutcome = null;
+    let isDragonTail = false;
+    let pendingTies = 0;
+    let streakIndex = 0;
+
+    for (const outcome of outcomes) {
+        if (outcome === 'T') {
+            if (cells.length === 0) {
+                pendingTies++;
+            } else {
+                cells[cells.length - 1].ties++;
+            }
+            continue;
+        }
+
+        if (currentStreakOutcome === null) {
+            currentStreakOutcome = outcome;
+            cells.push({ x: 0, y: 0, outcome, ties: pendingTies });
+            pendingTies = 0;
+        } else if (outcome === currentStreakOutcome) {
+            if (!isDragonTail && currentY + 1 < 6 && !cells.some(c => c.x === currentX && c.y === currentY + 1)) {
+                currentY++;
+            } else {
+                isDragonTail = true;
+                currentX++;
+            }
+            cells.push({ x: currentX, y: currentY, outcome, ties: pendingTies });
+            pendingTies = 0;
+        } else {
+            currentStreakOutcome = outcome;
+            isDragonTail = false;
+            streakIndex++;
+            
+            let nextCol = streakIndex;
+            while (cells.some(c => c.x === nextCol && c.y === 0)) {
+                nextCol++;
+            }
+            streakIndex = nextCol;
+            currentX = nextCol;
+            currentY = 0;
+            cells.push({ x: currentX, y: currentY, outcome, ties: pendingTies });
+            pendingTies = 0;
+        }
+    }
+
+    const maxX = cells.reduce((max, cell) => Math.max(max, cell.x), 0);
+    const minCols = 40;
+    const cols = Math.max(minCols, maxX + 2);
+    const cellSize = 16;
+    const width = cols * cellSize;
+    const height = 6 * cellSize;
+
+    let svgContent = `
+        <svg id="big-road-svg" width="${width}" height="${height}" style="min-width: 100%; min-height: 100%;">
+            <defs>
+                <pattern id="grid" width="${cellSize}" height="${cellSize}" patternUnits="userSpaceOnUse">
+                    <path d="M ${cellSize} 0 L 0 0 0 ${cellSize}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+    `;
+
+    cells.forEach(cell => {
+        const cx = cell.x * cellSize + cellSize / 2;
+        const cy = cell.y * cellSize + cellSize / 2;
+        const r = cellSize / 2 - 2;
+        const color = cell.outcome === 'P' ? '#3b82f6' : '#ef4444';
+
+        svgContent += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="2" />`;
+        
+        if (cell.ties > 0) {
+            svgContent += `<line x1="${cx - r + 1}" y1="${cy + r - 1}" x2="${cx + r - 1}" y2="${cy - r + 1}" stroke="#10b981" stroke-width="2" />`;
+        }
+        if (cell.ties > 1) {
+            svgContent += `<text x="${cx}" y="${cy + 3}" font-size="8" fill="#10b981" text-anchor="middle" font-weight="bold">${cell.ties}</text>`;
+        }
+    });
+
+    svgContent += `</svg>`;
+    bigRoadScroll.innerHTML = svgContent;
+    
+    if (mode === 'demo') {
+        bigRoadScroll.scrollLeft = 0;
+    } else {
+        const clientWidth = bigRoadScroll.clientWidth;
+        const targetX = (maxX + 2) * cellSize;
+        if (targetX > clientWidth) {
+            bigRoadScroll.scrollLeft = targetX - clientWidth;
+        } else {
+            bigRoadScroll.scrollLeft = 0;
+        }
+    }
 }
 
 function updateChart(outcomes) {
     const streakIndex = calculateStreakIndex(outcomes);
-    const maData = calculateMA(streakIndex, 9);
+    const maData6 = calculateMA(streakIndex, 6);
+    const maData9 = calculateMA(streakIndex, 9);
     
     const labels = Array.from({ length: 80 }, (_, i) => i + 1);
 
@@ -305,8 +440,11 @@ function updateChart(outcomes) {
         chartInstance.data.datasets[0].data = streakIndex;
         chartInstance.data.datasets[0].borderColor = mode === 'live' ? 'rgb(16, 185, 129)' : 'rgb(6, 182, 212)';
         
-        chartInstance.data.datasets[1].data = maData;
-        chartInstance.data.datasets[1].hidden = false;
+        chartInstance.data.datasets[1].data = maData6;
+        chartInstance.data.datasets[1].hidden = !maPeriods.includes(6);
+        
+        chartInstance.data.datasets[2].data = maData9;
+        chartInstance.data.datasets[2].hidden = !maPeriods.includes(9);
         
         chartInstance.update();
     } else {
@@ -323,17 +461,27 @@ function updateChart(outcomes) {
                         pointRadius: 0,
                         pointHoverRadius: 4,
                         fill: false,
-                        tension: 0.1,
+                        tension: 0.3,
+                    },
+                    {
+                        label: `6-Period MA`,
+                        data: maData6,
+                        borderColor: 'rgba(156, 163, 175, 0.5)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0.4,
+                        hidden: !maPeriods.includes(6),
                     },
                     {
                         label: `9-Period MA`,
-                        data: maData,
+                        data: maData9,
                         borderColor: 'rgba(255, 255, 255, 0.5)',
                         borderWidth: 1,
                         pointRadius: 0,
                         fill: false,
                         tension: 0.4,
-                        hidden: false,
+                        hidden: !maPeriods.includes(9),
                     }
                 ]
             },
